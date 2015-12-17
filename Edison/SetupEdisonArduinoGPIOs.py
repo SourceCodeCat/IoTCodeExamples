@@ -154,7 +154,7 @@ def generateInstructions(TYPE,PIN,OE,PUD,DIRECTION):
 
 #-----------------------------------------------------------------------------------------
 TYPE="PWM"
-PIN="IO5"      # pin we want to generate the instructions
+PIN="IO10"      # pin we want to generate the instructions
 OE="high"      # high=output; low=input
 PUD="in"       #in = pullup disabled; out= pullup enabled
 DIRECTION="in" #for GPIO, to tell the direction of the GPIO
