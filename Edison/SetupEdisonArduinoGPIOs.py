@@ -84,12 +84,31 @@ rulesMatrix.append(["IO19",165,"mode0","*"   ,"mode1","*"    ,"mode1","*"    ])
 rulesMatrix.append(["IO19",27 ,"*"    ,"*"   ,"mode1","*"    ,"*"    ,"*"    ])
 rulesMatrix.append(["IO19",237,"OE"   ,"*"   ,"mode1","*"    ,"OE"   ,"*"    ])
 rulesMatrix.append(["IO19",213,"PUD"  ,"*"   ,"mode1","*"    ,"PUD"  ,"*"    ])
-
+#-----------------------------------------------------------------------------------------
 EXPORT_TRI_STATE_ALL="echo 214 /sys/class/gpio/export"
 ENABLE_TRI_STATE_ALL="echo low > /sys/class/gpio/gpio214/direction"
 DISABLE_TRI_STATE_ALL="echo high > /sys/class/gpio/gpio214/direction"
+#-----------------------------------------------------------------------------------------
+def typeToColumn(TYPE):
+	if "GPIO" in TYPE:
+		return 2;
+	elif "PWM" in TYPE:
+		return 3;
+	elif "UART" in TYPE:
+		return 4;
+	elif "I2S" in TYPE:
+		return 5;
+	elif "I2C" in TYPE:
+		return 6;
+	elif "SPI" in TYPE:
+		return 7;
 def exportGPIO(GPIO):
 	return "echo " + str(GPIO) +" /sys/class/gpio/export";
+#-----------------------------------------------------------------------------------------
+def checkExported(GPIO):
+	result= os.system("ls /sys/class/gpio/ | grep -w gpio"+str(GPIO)+" | wc -l")
+	return result;
+#-----------------------------------------------------------------------------------------
 def setGPIOValue(GPIO, VALUE):
 	if "mode" in VALUE:
 		return "echo "+VALUE+" > /sys/kernel/debug/gpio_debug/gpio"+str(GPIO)+"/current_pinmux";
@@ -97,25 +116,44 @@ def setGPIOValue(GPIO, VALUE):
 		return "echo "+OE+" > /sys/class/gpio/gpio"+str(GPIO)+"/direction"
 	elif "PUD" in VALUE:
 		return "echo "+PUD+" > /sys/class/gpio/gpio"+str(GPIO)+"/direction"
+	elif "*" in VALUE:
+		return ""
 	else:
 		return "echo "+VALUE+" > /sys/class/gpio/gpio"+str(GPIO)+"/direction"; 
-def generateInstructions(TYPE,PIN,OE,PUD,DIRECTION):	
-	
-	print EXPORT_TRI_STATE_ALL
-	for i in range(0, 78):
-	    if rulesMatrix[i][0] == PIN:	
-		print exportGPIO(rulesMatrix[i][1])
-	print ENABLE_TRI_STATE_ALL
-	for i in range(0, 78):
-	    if rulesMatrix[i][0] == PIN:	
-		print setGPIOValue(rulesMatrix[i][1],rulesMatrix[i][3])      
-	print DISABLE_TRI_STATE_ALL
+#-----------------------------------------------------------------------------------------
+def generateInstructions(TYPE,PIN,OE,PUD,DIRECTION):
+	specificSettings=[]    #temp matrix to store the specific settings for a PIN.
+        goodToGo=False         #Flag that indicates if we are good to generate the instruction to enable the PIN    
+        typeIsSupported=False  #Flag indicating if the PIN can be enable as certain TYPE
 
-def checkExported(GPIO):
-	result= os.system("ls /sys/class/gpio/ | grep -w gpio"+str(GPIO)+" | wc -l")
-	return result
+	for i in range(0, 78):
+		if rulesMatrix[i][0] == PIN:
+			specificSettings.append([PIN,rulesMatrix[i][1],rulesMatrix[i][typeToColumn(TYPE)]])
+	#If the first GPIO defined in the specificSettings Matrix is not exported then we can use it
+	typeIsSupported = True if specificSettings[0][2] != "*" else False;	
+	#---------------------------------------------------------------------------------	
+	if typeIsSupported:
+		#If the first GPIO defined in the specificSettings Matrix is not exported then we can use it
+		goodToGo = True if checkExported(specificSettings[0][1]) == 0 else False;
 
-TYPE="GPIO"
+		if goodToGo:                  
+		        
+			if checkExported(214) == 0: print EXPORT_TRI_STATE_ALL
+			for i in range(0, len(specificSettings)):
+				print exportGPIO(specificSettings[i][1])
+			print ENABLE_TRI_STATE_ALL
+			for i in range(0, len(specificSettings)):
+				print setGPIOValue(specificSettings[i][1],specificSettings[i][2])      
+			print DISABLE_TRI_STATE_ALL	
+		else:
+			print "GPIO's associated to PIN: "+PIN+" are already being used"	
+	else:
+		print "the PIN: "+PIN+" can't be used as "+TYPE;
+
+
+
+#-----------------------------------------------------------------------------------------
+TYPE="PWM"
 PIN="IO5"      # pin we want to generate the instructions
 OE="high"      # high=output; low=input
 PUD="in"       #in = pullup disabled; out= pullup enabled
