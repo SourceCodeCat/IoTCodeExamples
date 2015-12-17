@@ -102,6 +102,7 @@ def typeToColumn(TYPE):
 		return 6;
 	elif "SPI" in TYPE:
 		return 7;
+#-----------------------------------------------------------------------------------------
 def exportGPIO(GPIO):
 	return "echo " + str(GPIO) +" /sys/class/gpio/export";
 #-----------------------------------------------------------------------------------------
@@ -153,7 +154,7 @@ def generateInstructions(TYPE,PIN,OE,PUD,DIRECTION):
 
 
 #-----------------------------------------------------------------------------------------
-TYPE="PWM"
+TYPE="SPI"
 PIN="IO10"      # pin we want to generate the instructions
 OE="high"      # high=output; low=input
 PUD="in"       #in = pullup disabled; out= pullup enabled
