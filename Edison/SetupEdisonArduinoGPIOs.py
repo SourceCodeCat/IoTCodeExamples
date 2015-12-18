@@ -106,6 +106,33 @@ def typeToColumn(TYPE):
 def exportGPIO(GPIO):
 	return "echo " + str(GPIO) +" /sys/class/gpio/export";
 #-----------------------------------------------------------------------------------------
+def getInput():
+	print("Pin configuration: GPIO    PWM     UART    I2S     I2C    SPI")
+	PTYPE=raw_input("What type of Pin configuration do you want?:")
+	#verify user input is a valid option from list	
+	while PTYPE not in {'GPIO', 'PWM', 'UART', 'I2S', 'I2C', 'SPI'}:
+		print("Use Uppercase and choose from the list")
+		PTYPE=raw_input("What type of Pin configuration do you want?:")
+	
+	PIN=raw_input("Enter the Arduino pin number between:  [IO0 - IO19]:")
+	while PIN not in {'IO0','IO1', 'IO2', 'IO3','IO4','IO5','IO6','IO7','IO8','IO8','IO9','IO10','IO11','IO12','IO13','IO14','IO15','IO16','IO17','IO18','IO19'}:
+		print("Enter pin number as IOx or IOxx")
+		PIN=raw_input("Enter the Arduino pin number between:  [IO0 - IO19]:")
+	
+	print("To enable Output/Input:[ high=output; low=input]")
+	OE=raw_input("Enable output/input:")
+	while OE not in {'high', 'low'}:
+		OE=raw_input("Enable output/input:")
+	if OE == "high":
+		DIRECTION="in"
+	if OE == "low":
+		DIRECTION="out"
+	
+	print("To enable/disable pullup resistor ")
+	PUD=raw_input("enter[in = pullup disabled; out= pullup enabled]:")
+	while PUD not in {'in', 'out'}:
+		PUD=raw_input("enter[in = pullup disabled; out= pullup enabled]:")
+#-----------------------------------------------------------------------------------------
 def checkExported(GPIO):
 	result= os.system("ls /sys/class/gpio/ | grep -w gpio"+str(GPIO)+" | wc -l")
 	return result;
@@ -154,14 +181,14 @@ def generateInstructions(TYPE,PIN,OE,PUD,DIRECTION):
 
 
 #-----------------------------------------------------------------------------------------
-TYPE="SPI"
-PIN="IO10"      # pin we want to generate the instructions
-OE="high"      # high=output; low=input
-PUD="in"       #in = pullup disabled; out= pullup enabled
-DIRECTION="in" #for GPIO, to tell the direction of the GPIO
-generateInstructions(TYPE,PIN,OE,PUD,DIRECTION)
-
-
+#TYPE="SPI"
+#PIN="IO10"      # pin we want to generate the instructions
+#OE="high"      # high=output; low=input
+#PUD="in"       #in = pullup disabled; out= pullup enabled
+#DIRECTION="in" #for GPIO, to tell the direction of the GPIO
+if __name__ == '__main__':
+	getInput()
+	generateInstructions(TYPE,PIN,OE,PUD,DIRECTION)
 
 
 
