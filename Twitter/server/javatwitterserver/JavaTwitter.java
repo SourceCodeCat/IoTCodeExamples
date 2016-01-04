@@ -7,7 +7,7 @@ package javatwitterserver;
 
 /**
  *
- * @author marco
+ * @author marco antonio salgado martinez
  */
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
@@ -16,10 +16,10 @@ import twitter4j.auth.AccessToken;
 
 public class JavaTwitter {   
 
-    private String consumerKeyStr;// = "0PQVCVzW7teE9YICgja6yA";
-    private String consumerSecretStr;// = "RFQqYGGVQyI7yIkwenHBlIyZgGCvRhrlCFX1mQedkqY";
-    private String accessTokenStr; //= "366625255-LcJ23aWvYinNasqBdnaMpfBBsDnQmSE81oQcL433";
-    private String accessTokenSecretStr;// = "qVFIMnnO6e6cugVNlmB48vwp3QWhzGANEUKztMXH3y7YM";  
+    private String consumerKeyStr;// = "";
+    private String consumerSecretStr;// = "";
+    private String accessTokenStr; //= "";
+    private String accessTokenSecretStr;// = "";  
     private Twitter twitter;
     AccessToken accessToken;
 

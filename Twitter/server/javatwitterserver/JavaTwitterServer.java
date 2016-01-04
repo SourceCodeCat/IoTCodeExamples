@@ -38,10 +38,10 @@ public class JavaTwitterServer extends Thread{
       try
       {
          javaTwitter= new JavaTwitter(
-                 "------------------------", //reaplce dashes with own consumerKeyStr
-                 "------------------------", //reaplce dashes with own consumerSecretStr
-                 "------------------------", //reaplce dashes with own accessTokenStr
-                 "------------------------"  //reaplce dashes with own accessTokenSecretStr
+                 "------------------------", //replace dashes with own consumerKeyStr
+                 "------------------------", //replace dashes with own consumerSecretStr
+                 "------------------------", //replace dashes with own accessTokenStr
+                 "------------------------"  //replace dashes with own accessTokenSecretStr
          ); 
          Thread t = new JavaTwitterServer(port);
          t.start();
