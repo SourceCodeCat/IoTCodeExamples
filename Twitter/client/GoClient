@@ -1,1 +1,0 @@
-java -cp . javasocketclient.JavaSocketClient $1 $2 "$3"
