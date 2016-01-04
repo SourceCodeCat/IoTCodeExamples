@@ -15,15 +15,16 @@ import java.io.*;
 public class JavaSocketClient
 {
    /*
-	The client receives two arguments:
+	The client receives three arguments:
         -server IP
         -server PORT
+	-message
    */
    public static void main(String [] args)
    {
       String serverName = args[0];//"192.168.1.75";//
       int port = Integer.parseInt(args[1]);//2125;//
-      String message = args[2];
+      String message = args[2]; //The message to send to the server
       try
       {
          System.out.println("Connecting to " + serverName +
