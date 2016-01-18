@@ -33,6 +33,10 @@ _3300SPS = 0x6       #: 3300SPS
 _3300SPS = 0x7       #: 3300SPS
 #--------------------------------------------------------------------------------------------
 
+#Operation Mode------------------------------------------------------------------------------
+MODE_CONTINUOUS = 0x0 #: Continuous conversion mode
+MODE_SINGLESHOT = 0x1 #: Power-down single-shot mode (default)
+#--------------------------------------------------------------------------------------------
 #Channel selection and read start stuff- the high nibble of the 16-bit cfg
 #register controls the start of a single conversion, the channel(s) read,
 #and whether they're read single ended or differential.
@@ -46,6 +50,8 @@ START_READ =  0x8000    # To start a read, we set the highest bit of the
 CFG_REG_CHL_MASK = 0xf000 # Used to clear the high nibble of the cfg reg
 BUSY_MASK = 0x8000 # When the highest bit in the cfg reg is set, the
 CHANNEL_SHIFT = 12   # shift the raw channel # by this
+MODE_MASK = 0x100       #Used to clear the mode bit
+MODE_SHIFT = 9          #shift the mode bit byt this  
 #OK = 0xc183 #<-----------is what the coreect config should be..
 #DEFAULT = 0x8583 #<------is defualt config..
 scaler = 1.0
@@ -151,6 +157,12 @@ def setRange(range_):
 def getScaler():
   return scaler;
 #-----------------------------------------------------------------------
+def setOprationMode(mode):
+  
+  cfgRegVal = getConfigRegister();
+  cfgRegVal &= ~MODE_MASK;
+  cfgRegVal |= (mode << MODE_SHIFT) & MODE_MASK;
+  setConfigRegister(cfgRegVal);
 #-----------------------------------------------------------------------
 #-----------------------------------------------------------------------
 #-----------------------------------------------------------------------
