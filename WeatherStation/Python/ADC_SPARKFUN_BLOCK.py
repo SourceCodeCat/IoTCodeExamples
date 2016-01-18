@@ -54,13 +54,13 @@ class ADCSPARKFUN:
 	scaler = 1.0
           
 
-	ADC = None              # variable that will hold a reference to the sparkfun ADC Block		
+	adc = None              # variable that will hold a reference to the sparkfun ADC Block		
 	
 	#-----------------------------------------------------------------------
 	
 	def getConfigRegister():
 		uint16_cfgRegVal = 0
-		uint16_cfgRegVal = adc.readWordReg(CONFIG)
+		uint16_cfgRegVal = self.adc.readWordReg(CONFIG)
 		uint16_cfgRegVal = (uint16_cfgRegVal>>8) | (uint16_cfgRegVal<<8 & 0XFF00)
 		return uint16_cfgRegVal         
 	#-----------------------------------------------------------------------
@@ -71,8 +71,8 @@ class ADCSPARKFUN:
 		#data[1] = configValue>>8;
 		#data[2] = configValue;
 	        configValue = (configValue>>8) | (configValue<<8 & 0XFF00) 
-	        adc.writeWordReg(CONFIG,configValue) 
-		#adc.write(bytearray(configValue));
+	        self.adc.writeWordReg(CONFIG,configValue) 
+		#self.adc.write(bytearray(configValue));
 	
 	
 	#-----------------------------------------------------------------------
@@ -110,7 +110,7 @@ class ADCSPARKFUN:
 				return 0xffff
 	
 		
-	        data = adc.readWordReg(CONVERSION)        
+	        data = self.adc.readWordReg(CONVERSION)        
 		result_mio += (data & 0XF000) >>12;
 	        result_mio += (data & 0XFF) << 4;
 	        result_mio = result_mio;
@@ -171,8 +171,8 @@ class ADCSPARKFUN:
 	#-----------------------------------------------------------------------
 	
 	
-	#adc = mraa.I2c(1)
-	#adc.address(0x48)
+	#self.adc = mraa.I2c(1)
+	#self.adc.address(0x48)
 	#setRange(_6_144V)
 	#print getResult(0)
 	#print hex(getConfigRegister())
