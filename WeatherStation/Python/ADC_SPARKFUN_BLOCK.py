@@ -54,63 +54,58 @@ class ADCSPARKFUN:
 	scaler = 1.0
           
 
-	adc = None              # variable that will hold a reference to the sparkfun ADC Block		
+	ADC = None              # variable that will hold a reference to the sparkfun ADC Block		
 	
 	#-----------------------------------------------------------------------
 	
-	def getConfigRegister():
+	def getConfigRegister(self):
 		uint16_cfgRegVal = 0
-		uint16_cfgRegVal = self.adc.readWordReg(CONFIG)
+		uint16_cfgRegVal = ADCSPARKFUN.adc.readWordReg(ADCSPARKFUN.CONFIG)
 		uint16_cfgRegVal = (uint16_cfgRegVal>>8) | (uint16_cfgRegVal<<8 & 0XFF00)
 		return uint16_cfgRegVal         
 	#-----------------------------------------------------------------------
-	def setConfigRegister(configValue):
+	def setConfigRegister(self,configValue):
 	
 		#data = [0]*3;
 		#data[0] = CONFIG;  #// address of the config register
 		#data[1] = configValue>>8;
 		#data[2] = configValue;
 	        configValue = (configValue>>8) | (configValue<<8 & 0XFF00) 
-	        self.adc.writeWordReg(CONFIG,configValue) 
-		#self.adc.write(bytearray(configValue));
+	        ADCSPARKFUN.adc.writeWordReg(ADCSPARKFUN.CONFIG,configValue) 
+		
 	
 	
 	#-----------------------------------------------------------------------
-	def getScaler():
-	
-		return _scaler;
-	
-	
 	#-----------------------------------------------------------------------
-	def getRawResult(channel):
+	def getRawResult(self,channel):
 	
 		cfgRegVal = getConfigRegister();
-		cfgRegVal &= ~CHANNEL_MASK; #// clear existing channel settings
-		cfgRegVal |= SINGLE_ENDED;  #// set the SE bit for a s-e read
-		cfgRegVal |= (channel<<CHANNEL_SHIFT) & CHANNEL_MASK; #// put the channel bits in
-		cfgRegVal |= START_READ;    #// set the start read bit
+		cfgRegVal &= ~ADCSPARKFUN.CHANNEL_MASK; #// clear existing channel settings
+		cfgRegVal |= ADCSPARKFUN.SINGLE_ENDED;  #// set the SE bit for a s-e read
+		cfgRegVal |= (channel<<ADCSPARKFUN.CHANNEL_SHIFT) & ADCSPARKFUN.CHANNEL_MASK; #// put the channel bits in
+		cfgRegVal |= ADCSPARKFUN.START_READ;    #// set the start read bit
 		setConfigRegister(cfgRegVal);
-		return readADC();
+		return ADCSPARKFUN.readADC();
 	#-----------------------------------------------------------------------
-	def readADC():
+	def readADC(self):
 	
-		cfgRegVal = getConfigRegister();
-		cfgRegVal |= START_READ; #// set the start read bit
-		setConfigRegister(cfgRegVal);
+		cfgRegVal = ADCSPARKFUN.getConfigRegister();
+		cfgRegVal |= ADCSPARKFUN.START_READ; #// set the start read bit
+		ADCSPARKFUN.setConfigRegister(cfgRegVal);
 	
 		result = 0;
 		fullValue=0;
 		busyDelay = 0;
 	        result_mio = 0;
 	
-		while (getConfigRegister() & BUSY_MASK) == 0 :
+		while (ADCSPARKFUN.getConfigRegister() & ADCSPARKFUN.BUSY_MASK) == 0 :
 			time.sleep(0.100);
 	                busyDelay+=1 
 			if busyDelay > 100:
 				return 0xffff
 	
 		
-	        data = self.adc.readWordReg(CONVERSION)        
+	        data = ADCSPARKFUN.adc.readWordReg(ADCSPARKFUN.CONVERSION)        
 		result_mio += (data & 0XF000) >>12;
 	        result_mio += (data & 0XFF) << 4;
 	        result_mio = result_mio;
@@ -127,52 +122,51 @@ class ADCSPARKFUN:
 	        return result_mio
 									    
 	#-----------------------------------------------------------------------
-	def getResult(channel):
+	def getResult(self,channel):
 	
-	  rawVal = getRawResult(channel);
-	  return float(rawVal) * scaler/1000;
+	  rawVal = ADCSPARKFUN.getRawResult(channel);
+	  return float(rawVal) * ADCSPARKFUN.scaler/1000;
 	
 	#-----------------------------------------------------------------------
-	def setRange(range_):
-	  global scaler
-	  cfgRegVal = getConfigRegister();
-	  cfgRegVal &= ~RANGE_MASK;
-	  cfgRegVal |= (range_ << RANGE_SHIFT) & RANGE_MASK;
+	def setRange(self,range_):
+	  cfgRegVal = ADCSPARKFUN.getConfigRegister();
+	  cfgRegVal &= ~ADCSPARKFUN.RANGE_MASK;
+	  cfgRegVal |= (range_ << ADCSPARKFUN.RANGE_SHIFT) & ADCSPARKFUN.RANGE_MASK;
 	  setConfigRegister(cfgRegVal);
-	  if range_ == _6_144V:
-	     scaler = 3.0;
-	  elif range_ == _4_096V:
-	       scaler = 2.0;  
-	  elif range_ == _2_048V:
-	       scaler = 1.0;
-	  elif range_ == _1_024V:
-	       scaler = 0.5;
-	  elif range_ == _0_512V:
-	       scaler = 0.25;
-	  elif range_ == _0_256V:
-	       scaler = 0.125;
+	  if range_ == ADCSPARKFUN._6_144V:
+	     ADCSPARKFUN.scaler = 3.0;
+	  elif range_ == ADCSPARKFUN._4_096V:
+	       ADCSPARKFUN.scaler = 2.0;  
+	  elif range_ == ADCSPARKFUN._2_048V:
+	       ADCSPARKFUN.scaler = 1.0;
+	  elif range_ == ADCSPARKFUN._1_024V:
+	       ADCSPARKFUN.scaler = 0.5;
+	  elif range_ == ADCSPARKFUN._0_512V:
+	       ADCSPARKFUN.scaler = 0.25;
+	  elif range_ == ADCSPARKFUN._0_256V:
+	       ADCSPARKFUN.scaler = 0.125;
 	
 	#-----------------------------------------------------------------------
-	def getScaler():
-	  return scaler;
+	def getScaler(self):
+	  return ADCSPARKFUN.scaler;
 	#-----------------------------------------------------------------------
-	def setOperationMode(mode):
+	def setOperationMode(self,mode):
 	
-	  cfgRegVal = getConfigRegister();
-	  cfgRegVal &= ~MODE_MASK;
-	  cfgRegVal |= (mode << MODE_SHIFT) & MODE_MASK;
-	  setConfigRegister(cfgRegVal);
+	  cfgRegVal = ADCSPARKFUN.getConfigRegister();
+	  cfgRegVal &= ~ADCSPARKFUN.MODE_MASK;
+	  cfgRegVal |= (mode << ADCSPARKFUN.MODE_SHIFT) & ADCSPARKFUN.MODE_MASK;
+	  ADCSPARKFUN.setConfigRegister(cfgRegVal);
 	#-----------------------------------------------------------------------
 	def __init__(self, PORT, ADDRESS):
-	  self.adc = mraa.I2c(PORT)
-          self.adc.address(ADDRESS)
+	  ADCSPARKFUN.adc = mraa.I2c(PORT)
+          ADCSPARKFUN.adc.address(ADDRESS)
 	   
 	#-----------------------------------------------------------------------
 	#-----------------------------------------------------------------------
 	
 	
-	#self.adc = mraa.I2c(1)
-	#self.adc.address(0x48)
+	#adc = mraa.I2c(1)
+	#adc.address(0x48)
 	#setRange(_6_144V)
 	#print getResult(0)
 	#print hex(getConfigRegister())
