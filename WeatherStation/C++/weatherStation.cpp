@@ -5,6 +5,7 @@
 #include "SparkFunADS1015.h"
 #include <cmath>
 #include <string.h>
+#include "tsl2561.h"
 using namespace std;
 
 // Declare a variable for our i2c object. You can create an
@@ -20,11 +21,14 @@ float adc_float = 0;
 #define RAINGAUGE_GPIO 36
 #define RAIN_MM 0.2794
 #define RAIN_INCHES 0.011
+#define DLS_BUS 1
+#define DLS_ADDRESS 0x29
 int anemometerTotal= 0;
 int Time = 0;
 float raingaugeTotal= 0.0;
 mraa::Gpio* gpioAnemometer;
 mraa::Gpio* gpioRainGauge;
+upm::TSL2561* digLight;
 void anemometerEvent(void * args)
 {
     anemometerTotal++;
@@ -127,12 +131,22 @@ string getWindDirection()
 
 
 }
-
+void digitalLight()                                           
+{                                                                         
+  upm::TSL2561* digLight= new upm::TSL2561(DLS_BUS,DLS_ADDRESS,0x00,0x00);
+}     
+int getLuxDigitalLight()
+{
+	 int lux =0
+	 lux = digLight->getLux();
+	 return lux;
+}
 
 
 int main()
 {
-
+        int l=0;
+        digitalLight()
 
 	setupADC();
 	setupAnemometer();
@@ -141,6 +155,8 @@ int main()
 	{
 		cout<<getWindDirection();
                 cout<<"Humidity: "<<getHumidity();
+                l=getLuxDigitalLight();
+                printf("Lux %d \n', l);  
 		if(Time > TIME_LIMIT_SECS)
 		{
 		    printf("Wind speed %f MPH \n", (anemometerTotal/Time)*WIND_SPEED_MPH );
