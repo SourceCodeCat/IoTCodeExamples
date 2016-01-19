@@ -3,9 +3,9 @@
 #include <iostream>
 #include <unistd.h>
 #include "SparkFunADS1015.h"
+#include "tsl2561.h"
 #include <cmath>
 #include <string.h>
-#include "tsl2561.h"
 using namespace std;
 
 // Declare a variable for our i2c object. You can create an
@@ -14,6 +14,9 @@ using namespace std;
 mraa::I2c* adc_i2c;
 ads1015 *adc;
 float adc_float = 0;
+float zeroOffset = 0.0;
+float slope = 0.0;
+#define V_SUPPLY 3.3;
 #define WIND_SPEED_MPH 1.492  
 #define WIND_SPEED_KM_H 2.4 
 #define TIME_LIMIT_SECS 5 
@@ -29,6 +32,33 @@ float raingaugeTotal= 0.0;
 mraa::Gpio* gpioAnemometer;
 mraa::Gpio* gpioRainGauge;
 upm::TSL2561* digLight;
+void setupDigitalLight()                                           
+{                                                                         
+	upm::TSL2561* digLight= new upm::TSL2561(DLS_BUS,DLS_ADDRESS,0x00,0x00);
+}     
+int getLuxDigitalLight()
+{
+	int lux =0
+	lux = digLight->getLux();
+	return lux;
+}
+void setupHumiditySensor()
+{
+        slope = 0.0062 * V_SUPPLY;                           
+        zeroOffset = 0.16 * V_SUPPLY;	
+}
+float getRawHumidity()
+{
+        return adc->getResult(1);
+}
+float getSensorRH()                             
+{                                     
+  return ((getRawHumidity() - zeroOffset) / slope);
+}                                        
+float getTrueRH(float temperature)
+{     
+  return getSensorRH() / (1.0546 - (0.00216 * temperature));
+}
 void anemometerEvent(void * args)
 {
     anemometerTotal++;
@@ -131,38 +161,30 @@ string getWindDirection()
 
 
 }
-void digitalLight()                                           
-{                                                                         
-  upm::TSL2561* digLight= new upm::TSL2561(DLS_BUS,DLS_ADDRESS,0x00,0x00);
-}     
-int getLuxDigitalLight()
-{
-	 int lux =0
-	 lux = digLight->getLux();
-	 return lux;
-}
+
 
 
 int main()
 {
-        int l=0;
-        digitalLight()
+
 
 	setupADC();
+	setupHumiditySensor();
+        //setupDigitalLight();
 	setupAnemometer();
 	setupRainGauge();
 	for(;;)
 	{
 		cout<<getWindDirection();
-                cout<<"Humidity: "<<getHumidity();
-                l=getLuxDigitalLight();
-                printf("Lux %d \n', l);  
+                //cout<<"Humidity: "<<getHumidity();
 		if(Time > TIME_LIMIT_SECS)
 		{
 		    printf("Wind speed %f MPH \n", (anemometerTotal/Time)*WIND_SPEED_MPH );
 		    printf("Wind speed %f KM/H \n", (anemometerTotal/Time)*WIND_SPEED_KM_H );
             	    printf("rainfall per Min %fmm\n", (raingaugeTotal/Time)*RAIN_MM);
             	    printf("rainfall per Min %fin\n", (raingaugeTotal/Time)*RAIN_INCHES);
+		    printf("RH: %.2f\n", getSensorRH());
+		    //printf("Lux %d \n', getLuxDigitalLight());
 		    anemometerTotal = 0;
 		    raingaugeTotal = 0.0;
 		    Time = 0;
@@ -172,3 +194,4 @@ int main()
 	}
 	return 0;
 }
+
