@@ -95,28 +95,28 @@ float getHumidity()
 string getWindDirection() 
 {
 	adc_float = adc->getResult(0);
-	if(abs(adc_float-0.801)<0.1 || abs(adc_float-2.076)<0.1)
+	if(abs(adc_float-2.64)<0.1 ||  abs(adc_float-1.36)<0.1)
 	{return "NORTH\n";//cout<<"NORTH\n";
 	}
-	else if(abs(adc_float-1.89)<0.1 || abs(adc_float-3.165)<0.01)
+	else if(abs(adc_float-1.55)<0.1 || abs(adc_float-1.282)<0.1)
 	{return "NORTH EAST\n";//cout<<"NORTH EAST\n";
 	}
-        else if(abs(adc_float-3.132)<0.01 || abs(adc_float-3.222)<0.01)       
+        else if(abs(adc_float-0.315)<0.1 || abs(adc_float-0.220)<0.1)       
         {return "EAST\n";//cout<<"EAST\n";
 	}  
-        else if(abs(adc_float-2.825)<0.1 || abs(adc_float-3.021)<0.1)
+        else if(abs(adc_float-0.62)<0.1 || abs(adc_float-0.426)<0.1)
 	{return "SOUTH EAST\n";//cout<<"SOUTH EAST\n";
 	}  
-        else if(abs(adc_float-2.481)<0.1 ||  abs(adc_float-2.625)<0.1)       
+        else if(abs(adc_float-0.965)<0.1 || abs(adc_float-0.82)<0.1)       
         {return"SOUTH\n";//cout<<"SOUTH\n";
 	}  
-        else if(abs(adc_float-1.323)<0.1 || abs(adc_float-1.425)<0.1)       
+        else if(abs(adc_float-2.12)<0.1 || abs(adc_float-2.018)<0.1)      
         {return "SOUTH WEST\n";//cout<<"SOUTH WEST\n";
         }  
-        else if(abs(adc_float-0.261)<0.1 || abs(adc_float-0.65)<0.1)       
+        else if(abs(adc_float-3.177)<0.1 || abs(adc_float-2.8)<0.1)       
         {return"WEST\n";//cout<<"WEST\n";
         }  
-        else if(abs(adc_float-0.455)<0.1 || abs(adc_float-1.077)<0.1)       
+        else if(abs(adc_float-2.9)<0.1 || abs(adc_float-2.36)<0.1)       
         {return "NORTH WEST\n";//cout<<"NORTH WEST\n";
 	}
 	//else
@@ -124,6 +124,7 @@ string getWindDirection()
 		//cout<<"Ch 0: "<<adc_float<<endl;
 		//usleep(500);
 	//}
+
 
 }
 
