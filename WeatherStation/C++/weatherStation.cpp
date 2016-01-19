@@ -88,6 +88,10 @@ int setupADC()
     return MRAA_SUCCESS;	
 }
 
+float getHumidity()
+{
+	float humidity = adc->getResult(1);
+}
 string getWindDirection() 
 {
 	adc_float = adc->getResult(0);
@@ -135,6 +139,7 @@ int main()
 	for(;;)
 	{
 		cout<<getWindDirection();
+                cout<<"Humidity: "<<getHumidity();
 		if(Time > TIME_LIMIT_SECS)
 		{
 		    printf("Wind speed %f MPH \n", (anemometerTotal/Time)*WIND_SPEED_MPH );
