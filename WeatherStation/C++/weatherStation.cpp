@@ -32,9 +32,10 @@ float raingaugeTotal= 0.0;
 mraa::Gpio* gpioAnemometer;
 mraa::Gpio* gpioRainGauge;
 upm::TSL2561* digLight;
+
 void setupDigitalLight()                                           
 {                                                                         
-	upm::TSL2561* digLight= new upm::TSL2561(DLS_BUS,DLS_ADDRESS,0x00,0x00);
+	digLight= new upm::TSL2561(DLS_BUS,DLS_ADDRESS,0x00,0x00);
 }     
 int getLuxDigitalLight()
 {
@@ -170,7 +171,7 @@ int main()
 
 	setupADC();
 	setupHumiditySensor();
-        //setupDigitalLight();
+        setupDigitalLight();
 	setupAnemometer();
 	setupRainGauge();
 	for(;;)
@@ -184,7 +185,7 @@ int main()
             	    printf("rainfall per Min %fmm\n", (raingaugeTotal/Time)*RAIN_MM);
             	    printf("rainfall per Min %fin\n", (raingaugeTotal/Time)*RAIN_INCHES);
 		    printf("RH: %.2f\n", getSensorRH());
-		    //printf("Lux %d \n', getLuxDigitalLight());
+		    printf("Lux %d \n", getLuxDigitalLight());
 		    anemometerTotal = 0;
 		    raingaugeTotal = 0.0;
 		    Time = 0;
