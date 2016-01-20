@@ -12,18 +12,6 @@ using namespace std;
 #define DWEET_URL "https://dweet.io/dweet/for/WZPN1"
 map<string,string> dweet_data;
 Freeboard * freeBoard;
-/*
-        //WDIRECTION_NAME=SOUTH&WDIRECTION=180
-        map<string,string> values;
-        values["WDIRECTION_NAME"]="EAST";
-        values["WDIRECTION"]="90";
-        fb = new Freeboard();
-        fb->sendValues("https://dweet.io/dweet/for/WZPN1",values);
-        return 0;
-
-*/
-
-
 // Declare a variable for our i2c object. You can create an
 //  arbitrary number of these, and pass them to however many
 //  slave devices you wish.
@@ -214,6 +202,7 @@ int main()
 	{		
         
 		getWindDirection(dweet_data);
+                //cout<<"Wind direction: "<< dweet_data["WDIRECTION_NAME"]<<endl;
 		if(Time > TIME_LIMIT_SECS)
 		{
 			//getWindDirection(dweet_data);
@@ -224,7 +213,7 @@ int main()
 			dweet_data["RH"] = to_string(getSensorRH());
 			dweet_data["LUX"] = to_string(getLuxDigitalLight());
 			
-			cout<<"Wind direction: "<< dweet_data["WDIRECTION_NAME"]<<" , "<< dweet_data["WDIRECTION"]<<endl;
+		    cout<<"Wind direction: "<< dweet_data["WDIRECTION_NAME"]<<endl;
 		    cout<<"Wind speed: "<< dweet_data["WINDSPEED_MPH"]<<" Mph"<<endl;
 		    cout<<"Wind speed: "<< dweet_data["WINDSPEED_KM"]<<" Kmh"<<endl;
 		    cout<<"Rainfall mm/min: "<< dweet_data["RAIN_LVL_MM"]<<endl;
