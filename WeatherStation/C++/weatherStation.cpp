@@ -6,7 +6,23 @@
 #include "tsl2561.h"
 #include <cmath>
 #include <string.h>
+#include "Freeboard.h"
+
 using namespace std;
+#define DWEET_URL "https://dweet.io/dweet/for/WZPN1"
+map<string,string> dweet_data;
+Freeboard * freeBoard;
+/*
+        //WDIRECTION_NAME=SOUTH&WDIRECTION=180
+        map<string,string> values;
+        values["WDIRECTION_NAME"]="EAST";
+        values["WDIRECTION"]="90";
+        fb = new Freeboard();
+        fb->sendValues("https://dweet.io/dweet/for/WZPN1",values);
+        return 0;
+
+*/
+
 
 // Declare a variable for our i2c object. You can create an
 //  arbitrary number of these, and pass them to however many
@@ -33,6 +49,10 @@ mraa::Gpio* gpioAnemometer;
 mraa::Gpio* gpioRainGauge;
 upm::TSL2561* digLight;
 
+void setupFreeboard()
+{
+	freeBoard = new Freeboard();
+}
 void setupDigitalLight()                                           
 {                                                                         
 	digLight= new upm::TSL2561(DLS_BUS,DLS_ADDRESS,0x00,0x00);
@@ -127,32 +147,48 @@ float getHumidity()
 {
 	float humidity = adc->getResult(1);
 }
-string getWindDirection() 
+string getWindDirection(map<string,string> &dweet_data) 
 {
 	adc_float = adc->getResult(0);
 	if(abs(adc_float-2.64)<0.1 ||  abs(adc_float-1.36)<0.1)
-	{return "NORTH\n";//cout<<"NORTH\n";
+	{
+		dweet_data["WDIRECTION_NAME"]="NORTH";dweet_data["WDIRECTION"]="0";
+		return "NORTH\n";//cout<<"NORTH\n";
 	}
 	else if(abs(adc_float-1.55)<0.1 || abs(adc_float-1.282)<0.1)
-	{return "NORTH EAST\n";//cout<<"NORTH EAST\n";
+	{
+		dweet_data["WDIRECTION_NAME"]="NORTH EAST";dweet_data["WDIRECTION"]="45";
+		return "NORTH EAST\n";//cout<<"NORTH EAST\n";
 	}
-        else if(abs(adc_float-0.315)<0.1 || abs(adc_float-0.220)<0.1)       
-        {return "EAST\n";//cout<<"EAST\n";
+    else if(abs(adc_float-0.315)<0.1 || abs(adc_float-0.220)<0.1)       
+    {
+    	dweet_data["WDIRECTION_NAME"]="EAST";dweet_data["WDIRECTION"]="90";
+    	return "EAST\n";//cout<<"EAST\n";
 	}  
-        else if(abs(adc_float-0.62)<0.1 || abs(adc_float-0.426)<0.1)
-	{return "SOUTH EAST\n";//cout<<"SOUTH EAST\n";
+    else if(abs(adc_float-0.62)<0.1 || abs(adc_float-0.426)<0.1)
+	{
+    	dweet_data["WDIRECTION_NAME"]="SOUTH EAST";dweet_data["WDIRECTION"]="135";
+    	return "SOUTH EAST\n";//cout<<"SOUTH EAST\n";
 	}  
-        else if(abs(adc_float-0.965)<0.1 || abs(adc_float-0.82)<0.1)       
-        {return"SOUTH\n";//cout<<"SOUTH\n";
+    else if(abs(adc_float-0.965)<0.1 || abs(adc_float-0.82)<0.1)       
+    {
+    	dweet_data["WDIRECTION_NAME"]="SOUTH";dweet_data["WDIRECTION"]="180";
+    	return"SOUTH\n";//cout<<"SOUTH\n";
 	}  
-        else if(abs(adc_float-2.12)<0.1 || abs(adc_float-2.018)<0.1)      
-        {return "SOUTH WEST\n";//cout<<"SOUTH WEST\n";
-        }  
-        else if(abs(adc_float-3.177)<0.1 || abs(adc_float-2.8)<0.1)       
-        {return"WEST\n";//cout<<"WEST\n";
-        }  
-        else if(abs(adc_float-2.9)<0.1 || abs(adc_float-2.36)<0.1)       
-        {return "NORTH WEST\n";//cout<<"NORTH WEST\n";
+	else if(abs(adc_float-2.12)<0.1 || abs(adc_float-2.018)<0.1)      
+	{
+		dweet_data["WDIRECTION_NAME"]="SOUTH WEST";dweet_data["WDIRECTION"]="225";
+		return "SOUTH WEST\n";//cout<<"SOUTH WEST\n";
+	}  
+	else if(abs(adc_float-3.177)<0.1 || abs(adc_float-2.8)<0.1)       
+	{
+		dweet_data["WDIRECTION_NAME"]="WEST";dweet_data["WDIRECTION"]="270";
+		return"WEST\n";//cout<<"WEST\n";
+	}  
+	else if(abs(adc_float-2.9)<0.1 || abs(adc_float-2.36)<0.1)       
+	{
+		dweet_data["WDIRECTION_NAME"]="NORTH WEST";dweet_data["WDIRECTION"]="315";
+		return "NORTH WEST\n";//cout<<"NORTH WEST\n";
 	}
 	//else
 	//{  
@@ -168,27 +204,44 @@ string getWindDirection()
 int main()
 {
 
-
+	setupFreeboard();
 	setupADC();
 	setupHumiditySensor();
         setupDigitalLight();
 	setupAnemometer();
 	setupRainGauge();
 	for(;;)
-	{
-		cout<<getWindDirection();
-                //cout<<"Humidity: "<<getHumidity();
+	{		
+        
+		getWindDirection(dweet_data);
 		if(Time > TIME_LIMIT_SECS)
 		{
-		    printf("Wind speed %f MPH \n", (anemometerTotal/Time)*WIND_SPEED_MPH );
-		    printf("Wind speed %f KM/H \n", (anemometerTotal/Time)*WIND_SPEED_KM_H );
-            	    printf("rainfall per Min %fmm\n", (raingaugeTotal/Time)*RAIN_MM);
-            	    printf("rainfall per Min %fin\n", (raingaugeTotal/Time)*RAIN_INCHES);
-		    printf("RH: %.2f\n", getSensorRH());
-		    printf("Lux %d \n", getLuxDigitalLight());
+			//getWindDirection(dweet_data);
+			dweet_data["WINDSPEED_MPH"] = to_string((anemometerTotal/Time)*WIND_SPEED_MPH);
+			dweet_data["WINDSPEED_KM"] = to_string((anemometerTotal/Time)*WIND_SPEED_KM_H);
+			dweet_data["RAIN_LVL_MM"] = to_string((raingaugeTotal/Time)*RAIN_MM);
+			dweet_data["RAIN_LVL_INCH"] = to_string((raingaugeTotal/Time)*RAIN_INCHES);
+			dweet_data["RH"] = to_string(getSensorRH());
+			dweet_data["LUX"] = to_string(getLuxDigitalLight());
+			
+			cout<<"Wind direction: "<< dweet_data["WDIRECTION_NAME"]<<" , "<< dweet_data["WDIRECTION"]<<endl;
+		    cout<<"Wind speed: "<< dweet_data["WINDSPEED_MPH"]<<" Mph"<<endl;
+		    cout<<"Wind speed: "<< dweet_data["WINDSPEED_KM"]<<" Kmh"<<endl;
+		    cout<<"Rainfall mm/min: "<< dweet_data["RAIN_LVL_MM"]<<endl;
+		    cout<<"Rainfall mm/inch: "<< dweet_data["RAIN_LVL_INCH"]<<endl;
+		    cout<<"Relative Humidity: "<< dweet_data["RH"]<<" %"<<endl;
+			cout<<"LUX: "<< dweet_data["LUX"]<<endl;
+			
+			//printf("Wind speed %f MPH \n", dweet_data["WINDSPEED_KM"].c_str());
+		    //printf("Wind speed %f KM/H \n", dweet_data["WINDSPEED_KM"].c_str());
+            //printf("rainfall per Min %fmm\n", (raingaugeTotal/Time)*RAIN_MM);
+            //printf("rainfall per Min %fin\n", (raingaugeTotal/Time)*RAIN_INCHES);
+		    //printf("RH: %.2f\n", getSensorRH());
+		    //printf("Lux %d \n", getLuxDigitalLight());
 		    anemometerTotal = 0;
 		    raingaugeTotal = 0.0;
 		    Time = 0;
+                    freeBoard->sendValues(DWEET_URL,dweet_data);
 		}
 		sleep(1);
 		Time++;	

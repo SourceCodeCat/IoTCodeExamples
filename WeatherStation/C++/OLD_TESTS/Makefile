@@ -1,4 +1,8 @@
-all: adcTest adcTestNames rainGaugeTest anemometerTest humidityTest
+all: adcTest adcTestNames rainGaugeTest anemometerTest humidityTest freeboard
+
+freeboard: testFreeboard.cpp
+		g++ `curl-config --libs` testFreeboard.cpp -o testFreeboard
+
 
 humidityTest: humidityTest.cpp
 	      g++ humidityTest.cpp -lmraa -o humidityTest
@@ -17,4 +21,4 @@ anemometerTest: anemometerTest.cpp
 
 
 clean:
-	rm adcTest adcTestNames rainGaugeTest anemometerTest humidityTest
+	rm adcTest adcTestNames rainGaugeTest anemometerTest humidityTest testFreeboard
