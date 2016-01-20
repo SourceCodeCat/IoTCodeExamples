@@ -40,8 +40,22 @@ class Freeboard
     {
 	if(curl) 
 	{
+           string v = "";
 	   curl_easy_setopt(curl, CURLOPT_URL, "https://dweet.io/dweet/for/WZPN1");//"https://dweet.io/dweet/for/my-thing-name"
-	   curl_easy_setopt(curl, CURLOPT_POSTFIELDS, mapToString(values));//"WDIRECTION_NAME=SOUTH&WDIRECTION=180"
+           
+	   for( map<string,string>::iterator val=values.begin(); val!=values.end(); ++val)
+   	   {
+                if(val == values.begin())
+		{
+		    v+=(*val).first +"="+(*val).second;
+		}
+		else
+		{
+		    v+="&"+(*val).first +"="+(*val).second;
+		}
+   	   }
+	   curl_easy_setopt(curl, CURLOPT_POSTFIELDS, v.c_str());//"WDIRECTION_NAME=SOUTH&WDIRECTION=180"
+ 
            res = curl_easy_perform(curl);
            if(res != CURLE_OK)
                fprintf(stderr, "curl_easy_perform() failed: %s\n",curl_easy_strerror(res));
@@ -58,22 +72,5 @@ class Freeboard
 	curl_global_cleanup();
     };
   private:
-    string mapToString(map<string,string> values)
-    {
-	string v
-        for( map<string,string>::iterator val=values.begin(); val!=values.end
-        {                                                                    
-             if(val == values.begin())                                       
-             {                                                               
-                 v+=(*val).first +"="+(*val).second;                         
-             }                                                               
-             else                                                            
-             {                                                               
-                 v+="&"+(*val).first +"="+(*val).second;                     
-             }                                                               
-        }
-	return v; 	
-    }
 };
 #endif
-
