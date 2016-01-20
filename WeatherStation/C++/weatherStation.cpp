@@ -10,16 +10,6 @@
 
 using namespace std;
 #define DWEET_URL "https://dweet.io/dweet/for/WZPN1"
-map<string,string> dweet_data;
-Freeboard * freeBoard;
-// Declare a variable for our i2c object. You can create an
-//  arbitrary number of these, and pass them to however many
-//  slave devices you wish.
-mraa::I2c* adc_i2c;
-ads1015 *adc;
-float adc_float = 0;
-float zeroOffset = 0.0;
-float slope = 0.0;
 #define V_SUPPLY 3.3;
 #define WIND_SPEED_MPH 1.492  
 #define WIND_SPEED_KM_H 2.4 
@@ -30,12 +20,21 @@ float slope = 0.0;
 #define RAIN_INCHES 0.011
 #define DLS_BUS 1
 #define DLS_ADDRESS 0x29
+map<string,string> dweet_data;
 int anemometerTotal= 0;
 int Time = 0;
 float raingaugeTotal= 0.0;
+float adc_float = 0;
+float zeroOffset = 0.0;
+float slope = 0.0;
+Freeboard * freeBoard;
+mraa::I2c* adc_i2c;
+ads1015 *adc;
 mraa::Gpio* gpioAnemometer;
 mraa::Gpio* gpioRainGauge;
 upm::TSL2561* digLight;
+
+//---------------------------------------------------------------------------------
 
 void setupFreeboard()
 {
@@ -235,6 +234,12 @@ int main()
 		sleep(1);
 		Time++;	
 	}
+	delete gpioAnemometer;
+	delete gpioRainGauge;
+	delete digLight;
+	delete freeBoard;
+	delete adc_i2c;
+	delete adc;
 	return 0;
 }
 
