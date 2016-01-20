@@ -1,7 +1,7 @@
-all: adcTest adcTestNames rainGaugeTest anemometerTest weatherStation
+all: adcTest adcTestNames rainGaugeTest anemometerTest humidityTest
 
-weatherStation: weatherStation.cpp
-	        g++ weatherStation.cpp SparkFunADS1015.cpp -lmraa -o weatherStation
+humidityTest: humidityTest.cpp
+	      g++ humidityTest.cpp -lmraa -o humidityTest
 
 adcTestNames: adcTestNames.cpp
 	      g++ -lmraa -o adcTestNames adcTestNames.cpp
@@ -17,4 +17,4 @@ anemometerTest: anemometerTest.cpp
 
 
 clean:
-	rm adcTest adcTestNames rainGaugeTest anemometerTest weatherStation
+	rm adcTest adcTestNames rainGaugeTest anemometerTest humidityTest

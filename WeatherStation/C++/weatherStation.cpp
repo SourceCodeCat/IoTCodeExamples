@@ -38,7 +38,7 @@ void setupDigitalLight()
 }     
 int getLuxDigitalLight()
 {
-	int lux =0
+	int lux =0;
 	lux = digLight->getLux();
 	return lux;
 }
