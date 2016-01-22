@@ -1,7 +1,8 @@
 GoClient
 GoServer
 *.class
-WeatherStation/C++/adcTest
-WeatherStation/C++/adcTestNames
-WeatherStation/C++/anemometerTest
-WeatherStation/C++/rainGaugeTest
+WeatherStation/C++/bin/
+WeatherStation/C++/OLD_TESTS/adcTest
+WeatherStation/C++/OLD_TESTS/adcTestNames
+WeatherStation/C++/OLD_TESTS/anemometerTest
+WeatherStation/C++/OLD_TESTS/rainGaugeTest
