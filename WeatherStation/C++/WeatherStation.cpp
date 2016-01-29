@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include "SparkFunADS1015.h"
 #include "tsl2561.h"
+#include "mpl3115a2.h"
 #include <cmath>
 #include <string.h>
 #include "Freeboard.h"
@@ -19,8 +20,10 @@ using namespace std;
 #define RH_POWER_GPIO 47
 #define RAIN_MM 0.2794
 #define RAIN_INCHES 0.011
-#define DLS_BUS 1
-#define DLS_ADDRESS 0x29
+#define EDISON_I2C_BUS 1
+#define DLS_TSL2561_ADDRESS 0x29
+#define MPL3115A2_I2C_ADDRESS 0x60
+
 map<string,string> dweet_data;
 int anemometerTotal= 0;
 int Time = 0;
@@ -35,6 +38,8 @@ mraa::Gpio* gpioAnemometer;
 mraa::Gpio* gpioRainGauge;
 mraa::Gpio* gpioPowerRH;
 upm::TSL2561* digLight;
+upm::MPL3115A2* batSensor; //barometric
+
 
 //---------------------------------------------------------------------------------
 
@@ -44,8 +49,32 @@ void setupFreeboard()
 }
 void setupDigitalLight()                                           
 {                                                                         
-	digLight= new upm::TSL2561(DLS_BUS,DLS_ADDRESS,0x00,0x00);
-}     
+	digLight= new upm::TSL2561(EDISON_I2C_BUS,DLS_TSL2561_ADDRES,0x00,0x00);
+}
+void setupBarometric()                                                 
+{   
+    //One Sensor for:Barometric pressure, altiude, temperature                                                                    
+    batSensor = new upm::MPL3115A2(EDISON_I2C_BUS, MPL3115A2_I2C_ADDRESS);
+    //batSensor->testSensor();                                              
+}   
+int getPressure()                                                    
+{                                                                      
+   float pressure    = 0.0;                                            
+   pressure    = batSensor->getPressure(false);                           
+   return (int)(pressure/100);                                                    
+}                                                                                                                                           
+int getAltitude()                                                    
+{                                                                      
+     float altitude    = 0.0;                                          
+     altitude    = batSensor->getAltitude();                              
+     return (int)altitude;                                                  
+}   
+int getTemperature()                                                 
+{                                                                      
+    float temperature = 0.0;                                           
+    temperature = batSensor->getTemperature(true);                        
+    return (int)temperature;                                                
+}                             
 int getLuxDigitalLight()
 {
 	int lux =0;
@@ -212,6 +241,7 @@ int main()
 	setupADC();
 	setupHumiditySensor();
         setupDigitalLight();
+	setupBarometric(); 
 	setupAnemometer();
 	setupRainGauge();
 	for(;;)
@@ -228,6 +258,9 @@ int main()
 			dweet_data["RAIN_LVL_INCH"] = to_string((raingaugeTotal/Time)*RAIN_INCHES);
 			dweet_data["RH"] = to_string(getSensorRH());
 			dweet_data["LUX"] = to_string(getLuxDigitalLight());
+                        dweet_data["PRESSURE"] = to_string(getPressure());
+			dweet_data["ALTITUDE"] = to_string(getAltitude());
+                        dweet_data["TEMPERATURE"] = to_string(getTemperature());
 			
 		    cout<<"Wind direction: "<< dweet_data["WDIRECTION_NAME"]<<endl;
 		    cout<<"Wind speed: "<< dweet_data["WINDSPEED_MPH"]<<" Mph"<<endl;
@@ -235,8 +268,10 @@ int main()
 		    cout<<"Rainfall mm/min: "<< dweet_data["RAIN_LVL_MM"]<<endl;
 		    cout<<"Rainfall mm/inch: "<< dweet_data["RAIN_LVL_INCH"]<<endl;
 		    cout<<"Relative Humidity: "<< dweet_data["RH"]<<" %"<<endl;
-			cout<<"LUX: "<< dweet_data["LUX"]<<endl;
-			
+		    cout<<"LUX: "<< dweet_data["LUX"]<<endl;
+		    cout<<"Pressure mb: "<< dweet_data["PRESSURE"]<<endl;
+		    cout<<"Altitude M: "<< dweet_data["ALTITUDE"]<<endl;
+		    cout<<"Temperature C: "<< dweet_data["TEMPERATURE"]<<endl	
 			//printf("Wind speed %f MPH \n", dweet_data["WINDSPEED_KM"].c_str());
 		    //printf("Wind speed %f KM/H \n", dweet_data["WINDSPEED_KM"].c_str());
             //printf("rainfall per Min %fmm\n", (raingaugeTotal/Time)*RAIN_MM);
@@ -255,6 +290,7 @@ int main()
 	delete gpioAnemometer;
 	delete gpioRainGauge;
 	delete digLight;
+        delete batSensor;        
 	delete freeBoard;
 	delete adc_i2c;
 	delete adc;
