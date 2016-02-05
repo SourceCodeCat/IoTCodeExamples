@@ -21,9 +21,9 @@ using namespace std;
 #define RAIN_MM 0.2794
 #define RAIN_INCHES 0.011
 #define EDISON_I2C_BUS 1
-#define DLS_TSL2561_ADDRESS 0x29
+#define DLS_ADDRESS 0x29
 #define MPL3115A2_I2C_ADDRESS 0x60
-
+//---------------------------------------------------------------------------------
 map<string,string> dweet_data;
 int anemometerTotal= 0;
 int Time = 0;
@@ -39,42 +39,40 @@ mraa::Gpio* gpioRainGauge;
 mraa::Gpio* gpioPowerRH;
 upm::TSL2561* digLight;
 upm::MPL3115A2* batSensor; //barometric
-
-
 //---------------------------------------------------------------------------------
 
+void setupBarometric()                                                       
+{   
+    //One Sensor for:Barometric pressure, altiude, temperature                                                                          
+    batSensor = new upm::MPL3115A2(EDISON_I2C_BUS, MPL3115A2_I2C_ADDRESS);
+    //batSensor->testSensor();                                                    
+}   
+int getPressure()                                                          
+{                                                                            
+   float pressure    = 0.0;                                                  
+   pressure    = batSensor->getPressure(false);                                 
+   return (int)(pressure/100);                                                          
+}                                                                                                                                                 
+int getAltitude()                                                          
+{                                                                            
+     float altitude    = 0.0;                                                
+     altitude    = batSensor->getAltitude();                                    
+     return (int)altitude;                                                        
+}   
+int getTemperature()                                                       
+{                                                                            
+    float temperature = 0.0;                                                 
+    temperature = batSensor->getTemperature(true);                              
+    return (int)temperature;                                                      
+} 
 void setupFreeboard()
 {
 	freeBoard = new Freeboard();
 }
 void setupDigitalLight()                                           
 {                                                                         
-	digLight= new upm::TSL2561(EDISON_I2C_BUS,DLS_TSL2561_ADDRES,0x00,0x00);
-}
-void setupBarometric()                                                 
-{   
-    //One Sensor for:Barometric pressure, altiude, temperature                                                                    
-    batSensor = new upm::MPL3115A2(EDISON_I2C_BUS, MPL3115A2_I2C_ADDRESS);
-    //batSensor->testSensor();                                              
-}   
-int getPressure()                                                    
-{                                                                      
-   float pressure    = 0.0;                                            
-   pressure    = batSensor->getPressure(false);                           
-   return (int)(pressure/100);                                                    
-}                                                                                                                                           
-int getAltitude()                                                    
-{                                                                      
-     float altitude    = 0.0;                                          
-     altitude    = batSensor->getAltitude();                              
-     return (int)altitude;                                                  
-}   
-int getTemperature()                                                 
-{                                                                      
-    float temperature = 0.0;                                           
-    temperature = batSensor->getTemperature(true);                        
-    return (int)temperature;                                                
-}                             
+	digLight= new upm::TSL2561(EDISON_I2C_BUS,DLS_ADDRESS,0x00,0x00);
+}     
 int getLuxDigitalLight()
 {
 	int lux =0;
@@ -193,20 +191,20 @@ string getWindDirection(map<string,string> &dweet_data)
 		dweet_data["WDIRECTION_NAME"]="NORTH_EAST";dweet_data["WDIRECTION"]="45";
 		return "NORTH EAST\n";//cout<<"NORTH EAST\n";
 	}
-    else if(abs(adc_float-0.315)<0.1 || abs(adc_float-0.220)<0.1)       
-    {
-    	dweet_data["WDIRECTION_NAME"]="EAST";dweet_data["WDIRECTION"]="90";
-    	return "EAST\n";//cout<<"EAST\n";
+    	else if(abs(adc_float-0.315)<0.1 || abs(adc_float-0.220)<0.1)       
+    	{
+    		dweet_data["WDIRECTION_NAME"]="EAST";dweet_data["WDIRECTION"]="90";
+	    	return "EAST\n";//cout<<"EAST\n";
 	}  
-    else if(abs(adc_float-0.62)<0.1 || abs(adc_float-0.426)<0.1)
+	else if(abs(adc_float-0.62)<0.1 || abs(adc_float-0.426)<0.1)
 	{
-    	dweet_data["WDIRECTION_NAME"]="SOUTH_EAST";dweet_data["WDIRECTION"]="135";
-    	return "SOUTH EAST\n";//cout<<"SOUTH EAST\n";
+	    	dweet_data["WDIRECTION_NAME"]="SOUTH_EAST";dweet_data["WDIRECTION"]="135";
+	    	return "SOUTH EAST\n";//cout<<"SOUTH EAST\n";
 	}  
-    else if(abs(adc_float-0.965)<0.1 || abs(adc_float-0.82)<0.1)       
-    {
-    	dweet_data["WDIRECTION_NAME"]="SOUTH";dweet_data["WDIRECTION"]="180";
-    	return"SOUTH\n";//cout<<"SOUTH\n";
+	else if(abs(adc_float-0.965)<0.1 || abs(adc_float-0.82)<0.1)       
+	{
+    		dweet_data["WDIRECTION_NAME"]="SOUTH";dweet_data["WDIRECTION"]="180";
+	    	return"SOUTH\n";//cout<<"SOUTH\n";
 	}  
 	else if(abs(adc_float-2.12)<0.1 || abs(adc_float-2.018)<0.1)      
 	{
@@ -232,11 +230,9 @@ string getWindDirection(map<string,string> &dweet_data)
 
 }
 
-
-
 int main()
 {
-
+	//setupBarometric();
 	setupFreeboard();
 	setupADC();
 	setupHumiditySensor();
@@ -258,35 +254,31 @@ int main()
 			dweet_data["RAIN_LVL_INCH"] = to_string((raingaugeTotal/Time)*RAIN_INCHES);
 			dweet_data["RH"] = to_string(getSensorRH());
 			dweet_data["LUX"] = to_string(getLuxDigitalLight());
-                        dweet_data["PRESSURE"] = to_string(getPressure());
-			dweet_data["ALTITUDE"] = to_string(getAltitude());
-                        dweet_data["TEMPERATURE"] = to_string(getTemperature());
-			
-		    cout<<"Wind direction: "<< dweet_data["WDIRECTION_NAME"]<<endl;
-		    cout<<"Wind speed: "<< dweet_data["WINDSPEED_MPH"]<<" Mph"<<endl;
-		    cout<<"Wind speed: "<< dweet_data["WINDSPEED_KM"]<<" Kmh"<<endl;
-		    cout<<"Rainfall mm/min: "<< dweet_data["RAIN_LVL_MM"]<<endl;
-		    cout<<"Rainfall mm/inch: "<< dweet_data["RAIN_LVL_INCH"]<<endl;
-		    cout<<"Relative Humidity: "<< dweet_data["RH"]<<" %"<<endl;
-		    cout<<"LUX: "<< dweet_data["LUX"]<<endl;
-		    cout<<"Pressure mb: "<< dweet_data["PRESSURE"]<<endl;
-		    cout<<"Altitude M: "<< dweet_data["ALTITUDE"]<<endl;
-		    cout<<"Temperature C: "<< dweet_data["TEMPERATURE"]<<endl	
-			//printf("Wind speed %f MPH \n", dweet_data["WINDSPEED_KM"].c_str());
-		    //printf("Wind speed %f KM/H \n", dweet_data["WINDSPEED_KM"].c_str());
-            //printf("rainfall per Min %fmm\n", (raingaugeTotal/Time)*RAIN_MM);
-            //printf("rainfall per Min %fin\n", (raingaugeTotal/Time)*RAIN_INCHES);
-		    //printf("RH: %.2f\n", getSensorRH());
-		    //printf("Lux %d \n", getLuxDigitalLight());
-		    anemometerTotal = 0;
-		    raingaugeTotal = 0.0;
-		    Time = 0;
-                    freeBoard->sendValues(DWEET_URL,dweet_data);
+                        //dweet_data["PRESSURE"] = to_string(getPressure());
+                        //dweet_data["ALTITUDE"] = to_string(getAltitude());
+                        //dweet_data["TEMPERATURE"] = to_string(getTemperature());  			
+
+		   	cout<<"Wind direction: "<< dweet_data["WDIRECTION_NAME"]<<endl;
+		    	cout<<"Wind speed: "<< dweet_data["WINDSPEED_MPH"]<<" Mph"<<endl;
+		    	cout<<"Wind speed: "<< dweet_data["WINDSPEED_KM"]<<" Kmh"<<endl;
+		    	cout<<"Rainfall mm/min: "<< dweet_data["RAIN_LVL_MM"]<<endl;
+		    	cout<<"Rainfall mm/inch: "<< dweet_data["RAIN_LVL_INCH"]<<endl;
+		    	cout<<"Relative Humidity: "<< dweet_data["RH"]<<" %"<<endl;
+			cout<<"LUX: "<< dweet_data["LUX"]<<endl;
+                        //cout<<"Pressure mb: "<< dweet_data["PRESSURE"]<<endl;
+        		//cout<<"Altitude M: "<< dweet_data["ALTITUDE"]<<endl;
+	                //cout<<"Temperature C: "<< dweet_data["TEMPERATURE"]<<endl		    
+	
+			anemometerTotal = 0;
+		    	raingaugeTotal = 0.0;
+		    	Time = 0;
+                    	freeBoard->sendValues(DWEET_URL,dweet_data);
 		}
 		sleep(1);
 		Time++;	
 	}
         //delete gpioPowerRH;
+        //delete batSensor; 
 	delete gpioAnemometer;
 	delete gpioRainGauge;
 	delete digLight;
