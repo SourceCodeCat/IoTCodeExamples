@@ -1,8 +1,4 @@
-#include <unistd.h>
-#include "grove.h"
 #include <stdio.h>
-#include <stdlib.h>
-#include <sstream>
 #include <iostream>
 #include <cstring>
 #include <mosquitto.h>
@@ -76,37 +72,11 @@ int main(int argc, char *argv[])
 	int port = 1884;
 	//int keepalive = 60;
 	//bool clean_session = true;
+	
 	myMosq *mymosq=new myMosq("12345",topic, host, port);
-	
-    // Create the temperature sensor object using AIO pin 0
-    upm::GroveTemp* temp = new upm::GroveTemp(0);
-    std::cout << temp->name() << std::endl;
-    // Read the temperature ten times, printing both the Celsius and
-    // equivalent Fahrenheit temperature, waiting one second between readings
-    char buffer [3];
-    std::stringstream celsius_ss;
-    
-    for (int i=0; i < 1000; i++) {
-        int celsius = temp->value();
-        celsius_ss.str("");
-	celsius_ss<<celsius;
-        int fahrenheit = (int) (celsius * 9.0/5.0 + 32.0);
-        printf("%d degrees Celsius, or %d degrees Fahrenheit\n",
-                celsius, fahrenheit);
-	
-        mymosq->send_message(celsius_ss.str().c_str());
-        sleep(1);
-    }
-
-
-
-
-
-	//myMosq *mymosq=new myMosq("12345",topic, host, port);
-	//mymosq->send_message("HOLA@!Q");	
+	mymosq->send_message("HOLA@!Q");	
 
 	delete mymosq;
-        
 	return 0;
 }
 
