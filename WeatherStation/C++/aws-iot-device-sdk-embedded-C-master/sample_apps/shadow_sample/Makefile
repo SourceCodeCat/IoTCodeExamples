@@ -5,10 +5,11 @@ DEBUG= @
 
 APP_DIR = .
 WRAPPER_NAME=test
-APP_NAME=marco
+APP_NAME=aws_wstation
 APP_INCLUDE_DIRS += -I $(APP_DIR)
 APP_SRC_FILES=$(APP_NAME).c
 WRAPPER_SRC_FILES=$(WRAPPER_NAME).cpp
+WRAPPER_INCLUDE_DIRS = 
 
 #IoT client directory
 
@@ -58,6 +59,7 @@ LD_FLAG += -Wl,-rpath,$(TLS_LIB_DIR)
 INCLUDE_ALL_DIRS += $(IOT_INCLUDE_DIRS) 
 INCLUDE_ALL_DIRS += $(MQTT_INCLUDE_DIR) 
 INCLUDE_ALL_DIRS += $(TLS_INCLUDE_DIR)
+WRAPPER_INCLUDE_DIRS = $(INCLUDE_ALL_DIRS)
 INCLUDE_ALL_DIRS += $(APP_INCLUDE_DIRS)
  
 SRC_FILES += $(MQTT_SRC_FILES)
@@ -82,7 +84,7 @@ all: $(APP_NAME).o
 	$(eval $(shell ld -r $(TEMP) -o $(APP_NAME)))
 	$(DEBUG)rm -rf $(APP_DIR)/*.o 
 	$(DEBUG)mv $(APP_NAME) $(APP_NAME).o
-	$(DEBUG)g++ $(WRAPPER_SRC_FILES) -o $(WRAPPER_NAME) $(APP_NAME).o $(EXTERNAL_LIBS) $(LD_FLAG) $(INCLUDE_ALL_DIRS)
+	$(DEBUG)g++ $(WRAPPER_SRC_FILES) -o $(WRAPPER_NAME) $(APP_NAME).o $(EXTERNAL_LIBS) $(LD_FLAG) $(WRAPPER_INCLUDE_DIRS)
 
 #this recipe compiles the objects needed for the C objects for the aws methods
 $(APP_NAME).o:

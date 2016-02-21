@@ -136,11 +136,8 @@ void parseInputArgsForConnectParams(int argc, char** argv) {
 }
 
 #define MAX_LENGTH_OF_UPDATE_JSON_BUFFER 200
-void  probando()
-{
-   printf("funcion probando \n");
-}
-void  superduper() {
+
+int main(int argc, char** argv) {
 	IoT_Error_t rc = NONE_ERROR;
 	int32_t i = 0;
 
@@ -173,7 +170,7 @@ void  superduper() {
 	char clientCRTName[] = AWS_IOT_CERTIFICATE_FILENAME;
 	char clientKeyName[] = AWS_IOT_PRIVATE_KEY_FILENAME;
 
-	//parseInputArgsForConnectParams(argc, argv);
+	parseInputArgsForConnectParams(argc, argv);
 
 	INFO("\nAWS IoT SDK Version(dev) %d.%d.%d-%s\n", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, VERSION_TAG);
 
@@ -247,5 +244,5 @@ void  superduper() {
 		ERROR("Disconnect error %d", rc);
 	}
 
-	//return rc;
+	return rc;
 }

@@ -1,6 +1,7 @@
 GoClient
 GoServer
 *.class
+*.o
 WeatherStation/C++/bin/
 WeatherStation/C++/OLD_TESTS/adcTest
 WeatherStation/C++/OLD_TESTS/adcTestNames
