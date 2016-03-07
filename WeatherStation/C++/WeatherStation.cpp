@@ -258,16 +258,16 @@ int main()
                 //cout<<"Wind direction: "<< dweet_data["WDIRECTION_NAME"]<<endl;
 		if(Time > REFRESH_TIME_SECS)
 		{
-			////getWindDirection(dweet_data);
-			//dweet_data["WINDSPEED_MPH"] = to_string((anemometerTotal/Time)*WIND_SPEED_MPH);
-			//dweet_data["WINDSPEED_KM"] = to_string((anemometerTotal/Time)*WIND_SPEED_KM_H);
-			//dweet_data["RAIN_LVL_MM"] = to_string((raingaugeTotal/Time)*RAIN_MM);
-			//dweet_data["RAIN_LVL_INCH"] = to_string((raingaugeTotal/Time)*RAIN_INCHES);
-			//dweet_data["RH"] = to_string(getSensorRH());			
-			//dweet_data["LUX"] = to_string(getLuxDigitalLight());
-			////dweet_data["PRESSURE"] = to_string(getPressure());
-			////dweet_data["ALTITUDE"] = to_string(getAltitude());
-			////dweet_data["TEMPERATURE"] = to_string(getTemperature()); 
+			//getWindDirection(dweet_data);
+			dweet_data["WINDSPEED_MPH"] = to_string((anemometerTotal/Time)*WIND_SPEED_MPH);
+			dweet_data["WINDSPEED_KM"] = to_string((anemometerTotal/Time)*WIND_SPEED_KM_H);
+			dweet_data["RAIN_LVL_MM"] = to_string((raingaugeTotal/Time)*RAIN_MM);
+			dweet_data["RAIN_LVL_INCH"] = to_string((raingaugeTotal/Time)*RAIN_INCHES);
+			dweet_data["RH"] = to_string(getSensorRH());			
+			dweet_data["LUX"] = to_string(getLuxDigitalLight());
+			//dweet_data["PRESSURE"] = to_string(getPressure());
+			//dweet_data["ALTITUDE"] = to_string(getAltitude());
+			//dweet_data["TEMPERATURE"] = to_string(getTemperature()); 
 			
 			//============================================================================
 			//sensor_data["RH"] = atof(dweet_data["RH"].c_str());
@@ -310,7 +310,7 @@ int main()
 			Time = 0;
 
 			//FREEBOARD==================================================================
-			//freeBoard->sendValues(DWEET_URL,dweet_data);
+			freeBoard->sendValues(DWEET_URL,dweet_data);
 			//===========================================================================
 
 

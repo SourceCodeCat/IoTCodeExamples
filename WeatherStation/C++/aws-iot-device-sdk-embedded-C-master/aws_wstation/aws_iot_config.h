@@ -25,11 +25,11 @@
 // =================================================
 #define AWS_IOT_MQTT_HOST              "A2XZ85IHWDF7C.iot.us-west-2.amazonaws.com"
 #define AWS_IOT_MQTT_PORT              8883
-#define AWS_IOT_MQTT_CLIENT_ID         "Wstation"
-#define AWS_IOT_MY_THING_NAME          "Wstation"
+#define AWS_IOT_MQTT_CLIENT_ID         "WStation"
+#define AWS_IOT_MY_THING_NAME          "WStation"
 #define AWS_IOT_ROOT_CA_FILENAME      "root-CA.crt"
-#define AWS_IOT_CERTIFICATE_FILENAME   "c21a15d99b-certificate.pem.crt"
-#define AWS_IOT_PRIVATE_KEY_FILENAME   "c21a15d99b-private.pem.key"
+#define AWS_IOT_CERTIFICATE_FILENAME   "834be7203a-certificate.pem.crt"
+#define AWS_IOT_PRIVATE_KEY_FILENAME   "834be7203a-private.pem.key"
 // =================================================
 // MQTT PubSub
 #define AWS_IOT_MQTT_TX_BUF_LEN 512 ///< Any time a message is sent out through the MQTT layer. The message is copied into this buffer anytime a publish is done. This will also be used in the case of Thing Shadow
