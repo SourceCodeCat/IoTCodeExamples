@@ -8,13 +8,15 @@
 #include <cmath>
 #include <string.h>
 #include "Freeboard.h"
+#include "aws_wstation.h"
 
 using namespace std;
 #define DWEET_URL "https://dweet.io/dweet/for/WZPN1"
 #define V_SUPPLY 3.3;
 #define WIND_SPEED_MPH 1.492  
 #define WIND_SPEED_KM_H 2.4 
-#define TIME_LIMIT_SECS 10 
+#define REFRESH_TIME_SECS 10 
+#define WAIT_INTERVAL REFRESH_TIME_SECS/REFRESH_TIME_SECS
 #define ANEMOMETER_GPIO 48
 #define RAINGAUGE_GPIO 36
 #define RH_POWER_GPIO 47
@@ -24,7 +26,15 @@ using namespace std;
 #define DLS_ADDRESS 0x29
 #define MPL3115A2_I2C_ADDRESS 0x60
 //---------------------------------------------------------------------------------
+extern "C"
+{
+	void initAWS_Wrapper();
+	void sendData();
+}
+float temperature = 56.0;
+//---------------------------------------------------------------------------------
 map<string,string> dweet_data;
+map<string,float> sensor_data;
 int anemometerTotal= 0;
 int Time = 0;
 float raingaugeTotal= 0.0;
@@ -232,48 +242,80 @@ string getWindDirection(map<string,string> &dweet_data)
 
 int main()
 {
-	//setupBarometric();
+	sensor_data["RH"]=0.0;
+	initAWS_Wrapper();
 	setupFreeboard();
 	setupADC();
 	setupHumiditySensor();
         setupDigitalLight();
-	setupBarometric(); 
-	setupAnemometer();
-	setupRainGauge();
+	//setupBarometric(); 
+	//setupAnemometer();
+	//setupRainGauge();
 	for(;;)
 	{		
         
-		getWindDirection(dweet_data);
+		//getWindDirection(dweet_data);
                 //cout<<"Wind direction: "<< dweet_data["WDIRECTION_NAME"]<<endl;
-		if(Time > TIME_LIMIT_SECS)
+		if(Time > REFRESH_TIME_SECS)
 		{
-			//getWindDirection(dweet_data);
-			dweet_data["WINDSPEED_MPH"] = to_string((anemometerTotal/Time)*WIND_SPEED_MPH);
-			dweet_data["WINDSPEED_KM"] = to_string((anemometerTotal/Time)*WIND_SPEED_KM_H);
-			dweet_data["RAIN_LVL_MM"] = to_string((raingaugeTotal/Time)*RAIN_MM);
-			dweet_data["RAIN_LVL_INCH"] = to_string((raingaugeTotal/Time)*RAIN_INCHES);
-			dweet_data["RH"] = to_string(getSensorRH());
-			dweet_data["LUX"] = to_string(getLuxDigitalLight());
-                        //dweet_data["PRESSURE"] = to_string(getPressure());
-                        //dweet_data["ALTITUDE"] = to_string(getAltitude());
-                        //dweet_data["TEMPERATURE"] = to_string(getTemperature());  			
+			////getWindDirection(dweet_data);
+			//dweet_data["WINDSPEED_MPH"] = to_string((anemometerTotal/Time)*WIND_SPEED_MPH);
+			//dweet_data["WINDSPEED_KM"] = to_string((anemometerTotal/Time)*WIND_SPEED_KM_H);
+			//dweet_data["RAIN_LVL_MM"] = to_string((raingaugeTotal/Time)*RAIN_MM);
+			//dweet_data["RAIN_LVL_INCH"] = to_string((raingaugeTotal/Time)*RAIN_INCHES);
+			//dweet_data["RH"] = to_string(getSensorRH());			
+			//dweet_data["LUX"] = to_string(getLuxDigitalLight());
+			////dweet_data["PRESSURE"] = to_string(getPressure());
+			////dweet_data["ALTITUDE"] = to_string(getAltitude());
+			////dweet_data["TEMPERATURE"] = to_string(getTemperature()); 
+			
+			//============================================================================
+			//sensor_data["RH"] = atof(dweet_data["RH"].c_str());
+			sensor_data["WINDSPEED_MPH"] = (anemometerTotal/Time)*WIND_SPEED_MPH;
+			sensor_data["WINDSPEED_KM"] = (anemometerTotal/Time)*WIND_SPEED_KM_H;
+			sensor_data["RAIN_LVL_MM"] = (raingaugeTotal/Time)*RAIN_MM;
+			sensor_data["RAIN_LVL_INCH"] = (raingaugeTotal/Time)*RAIN_INCHES;			 			
+			sensor_data["RH"] = getSensorRH();
+			sensor_data["LUX"] = getLuxDigitalLight();
+			//============================================================================
 
-		   	cout<<"Wind direction: "<< dweet_data["WDIRECTION_NAME"]<<endl;
-		    	cout<<"Wind speed: "<< dweet_data["WINDSPEED_MPH"]<<" Mph"<<endl;
-		    	cout<<"Wind speed: "<< dweet_data["WINDSPEED_KM"]<<" Kmh"<<endl;
-		    	cout<<"Rainfall mm/min: "<< dweet_data["RAIN_LVL_MM"]<<endl;
-		    	cout<<"Rainfall mm/inch: "<< dweet_data["RAIN_LVL_INCH"]<<endl;
-		    	cout<<"Relative Humidity: "<< dweet_data["RH"]<<" %"<<endl;
-			cout<<"LUX: "<< dweet_data["LUX"]<<endl;
-                        //cout<<"Pressure mb: "<< dweet_data["PRESSURE"]<<endl;
-        		//cout<<"Altitude M: "<< dweet_data["ALTITUDE"]<<endl;
-	                //cout<<"Temperature C: "<< dweet_data["TEMPERATURE"]<<endl		    
+			//PRINTING data to console====================================================
+			cout<<"Wind speed: "<< sensor_data["WINDSPEED_MPH"]<<" Mph"<<endl;
+			cout<<"Wind speed: "<< sensor_data["WINDSPEED_KM"]<<" Kmh"<<endl;
+			cout<<"Rainfall mm/min: "<< sensor_data["RAIN_LVL_MM"]<<endl;
+			cout<<"Rainfall mm/inch: "<< sensor_data["RAIN_LVL_INCH"]<<endl;
+			cout<<"Relative Humidity: "<< sensor_data["RH"]<<" %"<<endl;
+			cout<<"LUX: "<< sensor_data["LUX"]<<endl;			
+			////cout<<"Wind direction: "<< dweet_data["WDIRECTION_NAME"]<<endl;
+			//cout<<"Wind speed: "<< dweet_data["WINDSPEED_MPH"]<<" Mph"<<endl;
+			//cout<<"Wind speed: "<< dweet_data["WINDSPEED_KM"]<<" Kmh"<<endl;
+			//cout<<"Rainfall mm/min: "<< dweet_data["RAIN_LVL_MM"]<<endl;
+			//cout<<"Rainfall mm/inch: "<< dweet_data["RAIN_LVL_INCH"]<<endl;
+			//cout<<"Relative Humidity: "<< dweet_data["RH"]<<" %"<<endl;
+			//cout<<"LUX: "<< dweet_data["LUX"]<<endl;
+			//cout<<"Pressure mb: "<< dweet_data["PRESSURE"]<<endl;
+			//cout<<"Altitude M: "<< dweet_data["ALTITUDE"]<<endl;
+			//cout<<"Temperature C: "<< dweet_data["TEMPERATURE"]<<endl		    
 	
+			//AWS WRAPPER================================================================
+			awsSensorData[HUMIDITY].pData = &sensor_data["RH"]; //&temperature;
+			awsSensorData[LUX].pData = &sensor_data["LUX"]; 
+			awsSensorData[WSPEED_MPH].pData = &sensor_data["WINDSPEED_MPH"]; 
+			awsSensorData[WSPEED_KM].pData = &sensor_data["WINDSPEED_KM"];			
+			sendData();			
+			//===========================================================================
+			
 			anemometerTotal = 0;
-		    	raingaugeTotal = 0.0;
-		    	Time = 0;
-                    	freeBoard->sendValues(DWEET_URL,dweet_data);
+			raingaugeTotal = 0.0;
+			Time = 0;
+
+			//FREEBOARD==================================================================
+			//freeBoard->sendValues(DWEET_URL,dweet_data);
+			//===========================================================================
+
+
 		}
+		cout<<"Waiting for: "<< WAIT_INTERVAL<<endl;
 		sleep(1);
 		Time++;	
 	}
@@ -282,7 +324,7 @@ int main()
 	delete gpioAnemometer;
 	delete gpioRainGauge;
 	delete digLight;
-        delete batSensor;        
+	delete batSensor;        
 	delete freeBoard;
 	delete adc_i2c;
 	delete adc;

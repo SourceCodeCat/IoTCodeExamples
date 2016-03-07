@@ -3,10 +3,11 @@ DEBUG= @
 
 AWS_SDK_BASEDIR = aws-iot-device-sdk-embedded-C-master
 AWS_WRAPPER_DIR = $(AWS_SDK_BASEDIR)/aws_wstation
-AWS_WRAPPER_FILE = aws_wstation.o
-APP_INCLUDE_DIRS = -I $(AWS_WRAPPER_DIR)
-APP_NAME = test
-APP_SRC_FILES=$(APP_NAME).cpp
+AWS_WRAPPER_LIB = aws_wstation.o
+APP_INCLUDE_DIRS = -I $(AWS_WRAPPER_DIR) -I/usr/include/upm/ $(INCLUDE_ALL_DIRS)
+APP_LIBS = -lmraa -lupm-tsl2561 -lupm-mpl3115a2 $(AWS_WRAPPER_DIR$)/$(AWS_WRAPPER_LIB) $(EXTERNAL_LIBS) $(LD_FLAG)
+APP_NAME = WeatherStation
+APP_SRC_FILES=$(APP_NAME).cpp SparkFunADS1015.cpp
 
 
 
@@ -56,7 +57,7 @@ LD_FLAG += -Wl,-rpath,$(TLS_LIB_DIR)
 INCLUDE_ALL_DIRS += $(IOT_INCLUDE_DIRS) 
 INCLUDE_ALL_DIRS += $(MQTT_INCLUDE_DIR) 
 INCLUDE_ALL_DIRS += $(TLS_INCLUDE_DIR)
-INCLUDE_ALL_DIRS += $(APP_INCLUDE_DIRS)
+#INCLUDE_ALL_DIRS += $(APP_INCLUDE_DIRS)
  
 #SRC_FILES += $(MQTT_SRC_FILES)
 #SRC_FILES += $(APP_SRC_FILES)
@@ -72,13 +73,24 @@ COMPILER_FLAGS += -c -fPIC
 COMPILER_FLAGS += $(LOG_FLAGS)
 all: $(AWS_WRAPPER_DIR)/aws_wstation.o WeatherStation
 
-WeatherStation:  test.cpp #WeatherStation.cpp
+test: $(AWS_WRAPPER_DIR)/aws_wstation.o test.cpp
+	
+	#-----------------------------------------
+	# Compiling the test
+	#-----------------------------------------		
+	$(DEBUG)g++ test.cpp -o test $(AWS_WRAPPER_DIR$)/$(AWS_WRAPPER_LIB) $(EXTERNAL_LIBS) $(LD_FLAG) $(INCLUDE_ALL_DIRS) 
+	$(DEBUG)if [ -d "bin" ]; then echo "Yes there's bin dir"; else echo "creating bin dir"; mkdir bin ; fi
+	$(DEBUG)mv test bin/ 
+	#-----------------------------------------
+	# Done
+	#-----------------------------------------	
+
+WeatherStation:	WeatherStation.cpp
 		
 	#-----------------------------------------
 	# Compiling the WeatherStation-ware
-	#-----------------------------------------
-	$(DEBUG)g++ $(APP_SRC_FILES) -o $(APP_NAME) $(AWS_WRAPPER_DIR$)/$(AWS_WRAPPER_FILE) $(EXTERNAL_LIBS) $(LD_FLAG) $(INCLUDE_ALL_DIRS) 
-	@#g++ `curl-config --libs` WeatherStation.cpp SparkFunADS1015.cpp -I/usr/include/upm/ -lmraa -lupm-tsl2561  -o WeatherStation
+	#-----------------------------------------	
+	$(DEBUG)g++ `curl-config --libs` $(APP_SRC_FILES) $(APP_INCLUDE_DIRS) $(APP_LIBS) -o $(APP_NAME)
 	$(DEBUG)if [ -d "bin" ]; then echo "Yes there's bin dir"; else echo "creating bin dir"; mkdir bin ; fi
 	$(DEBUG)mv $(APP_NAME) bin/ 
 	#-----------------------------------------

@@ -28,13 +28,14 @@ void sendData()
 
 	aws_iot_shadow_init_json_document(JsonDocumentBuffer, sizeOfJsonDocumentBuffer);
 	
-	aws_iot_shadow_add_reported(JsonDocumentBuffer, sizeOfJsonDocumentBuffer, 3, 
-	&awsSensorData[TEMPERATURE], 
-	&awsSensorData[PRESSURE], 
-	&awsSensorData[ALTITUDE]);
+	aws_iot_shadow_add_reported(JsonDocumentBuffer, sizeOfJsonDocumentBuffer, 4, 
+	&awsSensorData[HUMIDITY],	
+	&awsSensorData[LUX], 
+	&awsSensorData[WSPEED_MPH], 
+	&awsSensorData[WSPEED_KM]);
 	
 	aws_iot_finalize_json_document(JsonDocumentBuffer, sizeOfJsonDocumentBuffer);
-	INFO("Update Shadow: %s", JsonDocumentBuffer);
+	INFO("\nUpdate Shadow: %s", JsonDocumentBuffer);
 /*
 	IoT_Error_t rc = NONE_ERROR;
 	rc = aws_iot_shadow_init_json_document(JsonDocumentBuffer, sizeOfJsonDocumentBuffer);
