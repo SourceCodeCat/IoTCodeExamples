@@ -15,7 +15,7 @@ using namespace std;
 #define V_SUPPLY 3.3;
 #define WIND_SPEED_MPH 1.492  
 #define WIND_SPEED_KM_H 2.4 
-#define REFRESH_TIME_SECS 10 
+#define REFRESH_TIME_SECS 1 
 #define WAIT_INTERVAL REFRESH_TIME_SECS/REFRESH_TIME_SECS
 #define ANEMOMETER_GPIO 48
 #define RAINGAUGE_GPIO 36
@@ -248,7 +248,7 @@ int main()
 	setupADC();
 	setupHumiditySensor();
         setupDigitalLight();
-	//setupBarometric(); 
+	setupBarometric(); 
 	//setupAnemometer();
 	//setupRainGauge();
 	for(;;)
@@ -265,16 +265,15 @@ int main()
 			dweet_data["RAIN_LVL_INCH"] = to_string((raingaugeTotal/Time)*RAIN_INCHES);
 			dweet_data["RH"] = to_string(getSensorRH());			
 			dweet_data["LUX"] = to_string(getLuxDigitalLight());
-			//dweet_data["PRESSURE"] = to_string(getPressure());
-			//dweet_data["ALTITUDE"] = to_string(getAltitude());
-			//dweet_data["TEMPERATURE"] = to_string(getTemperature()); 
+			dweet_data["PRESSURE"] = to_string(getPressure());
+			dweet_data["ALTITUDE"] = to_string(getAltitude());
+			dweet_data["TEMPERATURE"] = to_string(getTemperature()); 
 			
 			//============================================================================
 			//sensor_data["RH"] = atof(dweet_data["RH"].c_str());
 			sensor_data["WINDSPEED_MPH"] = (anemometerTotal/Time)*WIND_SPEED_MPH;
 			sensor_data["WINDSPEED_KM"] = (anemometerTotal/Time)*WIND_SPEED_KM_H;
 			sensor_data["RAIN_LVL_MM"] = (raingaugeTotal/Time)*RAIN_MM;
-			sensor_data["RAIN_LVL_INCH"] = (raingaugeTotal/Time)*RAIN_INCHES;			 			
 			sensor_data["RH"] = getSensorRH();
 			sensor_data["LUX"] = getLuxDigitalLight();
 			//============================================================================
