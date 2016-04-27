@@ -1,4 +1,4 @@
-// my first program in C++
+
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
