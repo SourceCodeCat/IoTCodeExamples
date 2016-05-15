@@ -10,7 +10,7 @@
 volatile int doWork = 0;
 
 
-/*
+
 void sig_handler(int signo)
 {
     if (signo == SIGINT) {
@@ -18,13 +18,11 @@ void sig_handler(int signo)
         doWork = 1;
     }
 }
-*/
-
 int main(int argc, char **argv)
 {
 
 	// Register signal handler
-	//signal(SIGINT, sig_handler);
+	signal(SIGINT, sig_handler);
 
 	float pressure    = 0.0;
 	float temperature = 0.0;
@@ -54,10 +52,6 @@ int main(int argc, char **argv)
         usleep (500000);
     }
 
-
-
-	//printf("Sleeping for 5 seconds\n");
-    //sleep(5);
     delete lcd;
     delete barometer;
     return 0;     
