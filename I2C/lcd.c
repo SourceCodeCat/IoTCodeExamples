@@ -66,14 +66,16 @@ void setRGBColor(I2CCONTEXT *rgb, int r, int g, int b)
 }
 void initLCD(I2CCONTEXT *lcd)
 {
+
 	writeByteRegister(lcd->file, 0x00, LCD_FUNCTIONSET | LCD_2LINE );
 	usleep(100);
-	_displaycontrol = LCD_DISPLAYON | LCD_CURSORON | LCD_BLINKON;
-	writeByteRegister(lcd->file, 0x00,LCD_DISPLAYCONTROL | _displaycontrol );
+	writeByteRegister(lcd->file, 0x00,LCD_DISPLAYCONTROL | LCD_DISPLAYON | LCD_CURSORON | LCD_BLINKON );
 	usleep(100);
-	writeByteRegister(lcd->file, 0x00, LCD_CLEARDISPLAY);
+	writeByteRegister(lcd->file, 0x00, LCD_CLEARDISPLAY );
 	usleep(4000);
-	writeByteRegister(lcd->file, 0x00,LCD_ENTRYMODESET | LCD_ENTRYLEFT | LCD_ENTRYSHIFTDECREMENT);
+	writeByteRegister(lcd->file, 0x00,LCD_ENTRYMODESET | LCD_ENTRYLEFT | LCD_ENTRYSHIFTDECREMENT );
+
+
 
 }
 
