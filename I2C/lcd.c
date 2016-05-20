@@ -59,54 +59,63 @@ I2CCONTEXT lcd, rgb;
 
 void setRGBColor(I2CCONTEXT *rgb, int r, int g, int b)
 {
-    	writebyteregister(rgb->file, REG_RED, r);
-	writebyteregister(rgb->file, REG_GREEN, g);
-    	writebyteregister(rgb->file, REG_BLUE, b);    
+    	writeByteRegister(rgb->file, REG_RED, r);
+	writeByteRegister(rgb->file, REG_GREEN, g);
+    	writeByteRegister(rgb->file, REG_BLUE, b);    
 	i2cRead(rgb->file, 0x04);
 }
 void initLCD(I2CCONTEXT *lcd)
 {
-	writebyteregister(lcd->file, 0x80, LCD_FUNCTIONSET | LCD_2LINE );
+	writeByteRegister(lcd->file, 0x00, LCD_FUNCTIONSET | LCD_2LINE );
 	usleep(100);
 	_displaycontrol = LCD_DISPLAYON | LCD_CURSORON | LCD_BLINKON;
-	writebyteregister(lcd->file, 0x80,LCD_DISPLAYCONTROL | _displaycontrol );
+	writeByteRegister(lcd->file, 0x00,LCD_DISPLAYCONTROL | _displaycontrol );
 	usleep(100);
-	writebyteregister(lcd->file, 0x80, LCD_CLEARDISPLAY);
+	writeByteRegister(lcd->file, 0x00, LCD_CLEARDISPLAY);
 	usleep(4000);
-	writebyteregister(lcd->file, 0x80,LCD_ENTRYMODESET | LCD_ENTRYLEFT | LCD_ENTRYSHIFTDECREMENT);
-	/*
-	writebyteregister(lcd->file, 0x80, LCD_FUNCTIONSET | _displayfunction );
-	usleep(4500);
-	writebyteregister(lcd->file, 0x80, LCD_FUNCTIONSET | _displayfunction );
-	usleep(150);
-	writebyteregister(lcd->file, 0x80, LCD_FUNCTIONSET | _displayfunction );
-	writebyteregister(lcd->file, 0x80, LCD_FUNCTIONSET | _displayfunction );
-	_displaycontrol = LCD_DISPLAYON | LCD_CURSORON | LCD_BLINKON | LCD_DISPLAYON;
-
-        writebyteregister(lcd->file, 0x80, LCD_DISPLAYCONTROL | _displaycontrol);
-	//clear display
-	writebyteregister(lcd->file, 0x80, LCD_CLEARDISPLAY);        // clear display, set cursor position to zero
-	usleep(2000);          // this command takes a long time!
-	_displaymode = LCD_ENTRYLEFT | LCD_ENTRYSHIFTDECREMENT;
-	writebyteregister(lcd->file, 0x80, LCD_ENTRYMODESET | _displaymode);
-	*/
-
-
+	writeByteRegister(lcd->file, 0x00,LCD_ENTRYMODESET | LCD_ENTRYLEFT | LCD_ENTRYSHIFTDECREMENT);
 
 }
 
 void initRGB(I2CCONTEXT *rgb)
 {
     	// backlight init
-    	writebyteregister(rgb->file, REG_MODE1, 0);
+    	writeByteRegister(rgb->file, REG_MODE1, 0);
     	// set LEDs controllable by both PWM and GRPPWM registers
-    	writebyteregister(rgb->file, REG_OUTPUT, 0xFF);
+    	writeByteRegister(rgb->file, REG_OUTPUT, 0xFF);
     	// set MODE2 values
     	// 0010 0000 -> 0x20  (DMBLNK to 1, ie blinky mode)
-	writebyteregister(rgb->file, REG_MODE2, 0x20);
+	writeByteRegister(rgb->file, REG_MODE2, 0x20);
 	// set the baklight Color to white :)
 	setRGBColor(rgb, 0xFF, 0xFF, 0xFF);//	
 }
+void turnOffRGB(I2CCONTEXT *rgb)
+{
+	setRGBColor(rgb, 0x00, 0x00, 0x00);	
+}
+void turnOffLCD(I2CCONTEXT *lcd)
+{
+	
+	writeByteRegister(lcd->file, 0x00, LCD_DISPLAYCONTROL );
+	writeByteRegister(lcd->file, 0x00, LCD_CLEARDISPLAY );
+
+}
+void writeToLCD(I2CCONTEXT *lcd, char *c)
+{
+
+	//writeByteRegister(lcd->file, 0x80, 0x48);
+	//usleep(4000);
+	
+	uint ascii_val=0;
+	int i;
+	int s = strlen(c);
+	for(i = 0 ; i < s; i++)
+	{
+		ascii_val = toascii(c[i]);
+		writeByteRegister(lcd->file, 0x40, ascii_val);
+	}
+}
+
 int main()
 {
 	//Grove LCD has two devices one that drives LCD
@@ -118,7 +127,15 @@ int main()
 	//init RGB device & set White color
 	initLCD(&lcd);
 	initRGB(&rgb);	
-	printf("\nDONE!\n");
-	
+
+	writeToLCD(&lcd, ":) HOLO!");
+	/*sleep for 5 secs before turning off*/
+    	sleep(5);
+    	/*turn off RGB LEDS*/
+    	turnOffRGB(&rgb);
+    	turnOffLCD(&lcd);
+    	printf("\nDONE!\n");
+
+
 	return 0;
 }

@@ -85,7 +85,7 @@ int i2cWrite(int file, int reg, int data)
 		return 1;
 	}
 }
-__s32 writebyteregister(int file, __u8 command, __u8 value)
+__s32 writeByteRegister(int file, __u8 command, __u8 value)
 {
 	__s32 res = -1;
 	res = i2c_smbus_write_byte_data(file, command, value);
