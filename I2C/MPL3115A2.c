@@ -43,7 +43,7 @@ static int MPL3115A2_probe(struct i2c_client *client, const struct i2c_device_id
 static int MPL3115A2_remove(struct i2c_client *client)
 {
 	printk("%s: trying to remove the device...\n",__FUNCTION__);
-	i2c_unregister_device(MPL3115A2_client);
+	//i2c_unregister_device(MPL3115A2_client);
 	//i2c_del_adapter(MPL3115A2_adapter);
 	return 0;
 }
