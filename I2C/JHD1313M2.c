@@ -51,7 +51,8 @@ void writeToLCD(const struct i2c_client *client, char *c)
 	
 	int ascii_val=0;
 	int i;
-	int s = strlen(c);
+	int s = strlen(c)-1; //this is to avoid writing the last character,
+	//because the data received from sysfs buffer has a weird ending char
 	for(i = 0 ; i < s; i++)
 	{
 		ascii_val = toascii(c[i]);				
