@@ -25,6 +25,9 @@
 #include <linux/delay.h>
 #include <linux/ctype.h>
 #include <linux/string.h>
+#include <linux/kobject.h>
+#include <linux/sysfs.h>
+
 
 #define TAG "JHD1313M2"
 //////////////////////////////////////////////////////////
@@ -87,7 +90,13 @@ uint8_t lines = 2;
 
 static struct i2c_client * JHD1313M2_RGB_client;
 static struct i2c_client * JHD1313M2_LCD_client;
-struct i2c_adapter * JHD1313M2_adapter;
+static struct i2c_adapter * JHD1313M2_adapter;
+static struct kobject * JHD1313M2_kobject;
+static char * lcd_text; //variable ot link user space-driver
+static int * rgb_r; //variable to set the red color from usr space
+static int * rgb_g; //variable to set the green color from usr space
+static int * rgb_b; //variable to set the blue color from usr space
+
 
 
 

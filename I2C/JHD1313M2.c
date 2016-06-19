@@ -38,6 +38,11 @@ s32 writeByteRegister(const struct i2c_client *client,u8 reg, u8 value)
 	}
 	return res;
 }
+void clearLCD(const struct i2c_client *client)
+{
+	writeByteRegister(client, 0x00, LCD_CLEARDISPLAY );
+	msleep(10);
+}
 void writeToLCD(const struct i2c_client *client, char *c)
 {
 
@@ -53,6 +58,18 @@ void writeToLCD(const struct i2c_client *client, char *c)
 		writeByteRegister(client, 0x40, ascii_val);
 	}
 }
+void set_R_Color(const struct i2c_client *client, int r)
+{
+	writeByteRegister(client, REG_RED, r);
+}
+void set_G_Color(const struct i2c_client *client, int g)
+{
+	writeByteRegister(client, REG_GREEN, g);
+}
+void set_B_Color(const struct i2c_client *client, int b)
+{
+    	writeByteRegister(client, REG_BLUE, b);
+}
 void setRGBColor(const struct i2c_client *client, int r, int g, int b)
 {
     	writeByteRegister(client, REG_RED, r);
@@ -64,11 +81,11 @@ void initLCD(const struct i2c_client *client)
 {
 
 	writeByteRegister(client, 0x00, LCD_FUNCTIONSET | LCD_2LINE );
-	msleep(100);
+	msleep(10);
 	writeByteRegister(client, 0x00,LCD_DISPLAYCONTROL | LCD_DISPLAYON | LCD_CURSORON | LCD_BLINKON );
-	msleep(100);
+	msleep(10);
 	writeByteRegister(client, 0x00, LCD_CLEARDISPLAY );
-	msleep(4000);
+	msleep(40);
 	writeByteRegister(client, 0x00,LCD_ENTRYMODESET | LCD_ENTRYLEFT | LCD_ENTRYSHIFTDECREMENT );
 
 }
@@ -96,10 +113,60 @@ void initRGB(const struct i2c_client *client)
 	// set the baklight Color to white :)
 	setRGBColor(client, 0xFF, 0xFF, 0xFF);//	
 }
+/*
+static ssize_t JHD1313M2_show(struct kobject *kobj, struct kobj_attribute *attr,
+                      char *buf)
+{
+        return sprintf(buf, "%d\n", 1);
+}
+*/
+static ssize_t JHD1313M2_store(struct kobject *kobj, struct kobj_attribute *attr,
+                      char *buf, size_t count)
+{
+	//printk("%s: Message from user space:  %s\n",__FUNCTION__,buf);
+	//printk("%s: attr:  %s\n",__FUNCTION__,attr->attr.name);
+
+	if(strcmp(attr->attr.name,"lcd_text") == 0)
+	{
+		//sscanf(buf, "%c", lcd_text);
+		//snprintf(lcd_text, sizeof(buf)-1,"%s",buf);
+		//buf[sizeof(buf)] = ' ';
+		clearLCD(JHD1313M2_LCD_client);	
+		writeToLCD(JHD1313M2_LCD_client,buf);
+	}
+	else if(strcmp(attr->attr.name,"rgb_r") == 0)
+	{
+		sscanf(buf, "%du", &rgb_r);
+		//printk("%s: red new val:  %d\n",__FUNCTION__,rgb_r);
+		set_R_Color(JHD1313M2_RGB_client,rgb_r);
+	}
+	else if(strcmp(attr->attr.name,"rgb_g") == 0)
+	{
+		sscanf(buf, "%du", &rgb_g);
+		set_G_Color(JHD1313M2_RGB_client,rgb_g);
+	}
+	else if(strcmp(attr->attr.name,"rgb_b") == 0)
+	{
+		sscanf(buf, "%du", &rgb_b);
+		set_B_Color(JHD1313M2_RGB_client,rgb_b);
+	}
+        return count;
+}
+
+static struct kobj_attribute JHD1313M2_attribute_lcdtext =__ATTR(lcd_text, 0660,
+					 NULL, JHD1313M2_store); 
+static struct kobj_attribute JHD1313M2_attribute_rcolor =__ATTR(rgb_r, 0660,
+					 NULL, JHD1313M2_store);
+static struct kobj_attribute JHD1313M2_attribute_gcolor =__ATTR(rgb_g, 0660,
+					 NULL, JHD1313M2_store);
+static struct kobj_attribute JHD1313M2_attribute_bcolor =__ATTR(rgb_b, 0660,
+					 NULL, JHD1313M2_store);
 static int JHD1313M2_RGB_probe(struct i2c_client *client, const struct i2c_device_id *idp)
 {
 	printk("%s: trying to probe the device (%s)...\n",__FUNCTION__,client->name);
-	initRGB(client);
+	JHD1313M2_RGB_client = client;	
+	initRGB(JHD1313M2_RGB_client);
+	
 /*
 	s32 id;
 	printk("%s: trying to probe the device (%s)...\n",
@@ -113,8 +180,9 @@ static int JHD1313M2_RGB_probe(struct i2c_client *client, const struct i2c_devic
 static int JHD1313M2_LCD_probe(struct i2c_client *client, const struct i2c_device_id *idp)
 {
 	printk("%s: trying to probe the device (%s)...\n",__FUNCTION__,client->name);
-	initLCD(client);
-	writeToLCD(client,"nice!");
+	JHD1313M2_LCD_client = client;	
+	initLCD(JHD1313M2_LCD_client);
+	writeToLCD(JHD1313M2_LCD_client,"nice!");
 /*
 	s32 id;
 	printk("%s: trying to probe the device (%s)...\n",
@@ -130,7 +198,7 @@ static int JHD1313M2_RGB_remove(struct i2c_client *client)
 	printk("%s: trying to remove the device...\n",__FUNCTION__);
 	printk("%s: turning OFF rgb device...\n",__FUNCTION__);
 	turnOffRGB(client);
-	//i2c_unregister_device(JHD1313M2_client);
+	//i2c_unregister_device(JHD1313M2_RGB_client);
 	//i2c_del_adapter(JHD1313M2_adapter);
 	return 0;
 }
@@ -139,7 +207,7 @@ static int JHD1313M2_LCD_remove(struct i2c_client *client)
 	printk("%s: trying to remove the device...\n",__FUNCTION__);
 	printk("%s: turning OFF lcd device...\n",__FUNCTION__);
 	turnOffLCD(client);
-	//i2c_unregister_device(JHD1313M2_client);
+	//i2c_unregister_device(JHD1313M2_LCD_client);
 	//i2c_del_adapter(JHD1313M2_adapter);
 	return 0;
 }
@@ -178,6 +246,13 @@ static int __init JHD1313M2_init(void)
 	printk("%s: trying to add the device driver...\n",__FUNCTION__);	
 	res_rgb = i2c_add_driver(&JHD1313M2_RGB_driver);
 	res_lcd = i2c_add_driver(&JHD1313M2_LCD_driver);
+	printk("%s: creating sysfs access...\n",__FUNCTION__);	
+	JHD1313M2_kobject = kobject_create_and_add("JHD1313M2",
+                                                 kernel_kobj);
+	sysfs_create_file(JHD1313M2_kobject, &JHD1313M2_attribute_lcdtext.attr);
+	sysfs_create_file(JHD1313M2_kobject, &JHD1313M2_attribute_rcolor.attr);
+	sysfs_create_file(JHD1313M2_kobject, &JHD1313M2_attribute_gcolor.attr);
+	sysfs_create_file(JHD1313M2_kobject, &JHD1313M2_attribute_bcolor.attr);
 
 	return 0;
 	
@@ -189,6 +264,8 @@ static void __exit JHD1313M2_exit(void)
 	printk("%s: trying to delete the device drivers...\n",__FUNCTION__);
 	i2c_del_driver(&JHD1313M2_RGB_driver);
 	i2c_del_driver(&JHD1313M2_LCD_driver);	
+        pr_debug ("%s: Module un initialized successfully \n",__FUNCTION__);
+        kobject_put(JHD1313M2_kobject);
 }
 
 
