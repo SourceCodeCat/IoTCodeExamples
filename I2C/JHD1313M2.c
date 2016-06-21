@@ -41,7 +41,7 @@ s32 writeByteRegister(const struct i2c_client *client,u8 reg, u8 value)
 void clearLCD(const struct i2c_client *client)
 {
 	writeByteRegister(client, 0x00, LCD_CLEARDISPLAY );
-	msleep(10);
+	msleep(1);
 }
 void writeToLCD(const struct i2c_client *client, char *c)
 {
@@ -83,11 +83,13 @@ void initLCD(const struct i2c_client *client)
 
 	writeByteRegister(client, 0x00, LCD_FUNCTIONSET | LCD_2LINE );
 	msleep(10);
-	writeByteRegister(client, 0x00,LCD_DISPLAYCONTROL | LCD_DISPLAYON | LCD_CURSORON | LCD_BLINKON );
+	writeByteRegister(client, 0x00,LCD_DISPLAYCONTROL | LCD_DISPLAYON 
+						| LCD_CURSORON | LCD_BLINKON );
 	msleep(10);
 	writeByteRegister(client, 0x00, LCD_CLEARDISPLAY );
 	msleep(40);
-	writeByteRegister(client, 0x00,LCD_ENTRYMODESET | LCD_ENTRYLEFT | LCD_ENTRYSHIFTDECREMENT );
+	writeByteRegister(client, 0x00,LCD_ENTRYMODESET | LCD_ENTRYLEFT 
+						| LCD_ENTRYSHIFTDECREMENT );
 
 }
 
@@ -109,7 +111,6 @@ void initRGB(const struct i2c_client *client)
     	// set LEDs controllable by both PWM and GRPPWM registers
     	writeByteRegister(client, REG_OUTPUT, 0xFF);
     	// set MODE2 values
-    	// 0010 0000 -> 0x20  (DMBLNK to 1, ie blinky mode)
 	writeByteRegister(client, REG_MODE2, 0x20);
 	// set the baklight Color to white :)
 	setRGBColor(client, 0xFF, 0xFF, 0xFF);//	
@@ -137,31 +138,23 @@ static ssize_t JHD1313M2_store(struct kobject *kobj, struct kobj_attribute *attr
 	}
 	else if(strcmp(attr->attr.name,"rgb_r") == 0)
 	{
-		sscanf(buf, "%du", &rgb_r);
+		sscanf(buf, "%du", &rgb_r_);
 		//printk("%s: red new val:  %d\n",__FUNCTION__,rgb_r);
-		set_R_Color(JHD1313M2_RGB_client,rgb_r);
+		set_R_Color(JHD1313M2_RGB_client,rgb_r_);
 	}
 	else if(strcmp(attr->attr.name,"rgb_g") == 0)
 	{
-		sscanf(buf, "%du", &rgb_g);
-		set_G_Color(JHD1313M2_RGB_client,rgb_g);
+		sscanf(buf, "%du", &rgb_g_);
+		set_G_Color(JHD1313M2_RGB_client,rgb_g_);
 	}
 	else if(strcmp(attr->attr.name,"rgb_b") == 0)
 	{
-		sscanf(buf, "%du", &rgb_b);
-		set_B_Color(JHD1313M2_RGB_client,rgb_b);
+		sscanf(buf, "%du", &rgb_b_);
+		set_B_Color(JHD1313M2_RGB_client,rgb_b_);
 	}
         return count;
 }
 
-static struct kobj_attribute JHD1313M2_attribute_lcdtext =__ATTR(lcd_text, 0660,
-					 NULL, JHD1313M2_store); 
-static struct kobj_attribute JHD1313M2_attribute_rcolor =__ATTR(rgb_r, 0660,
-					 NULL, JHD1313M2_store);
-static struct kobj_attribute JHD1313M2_attribute_gcolor =__ATTR(rgb_g, 0660,
-					 NULL, JHD1313M2_store);
-static struct kobj_attribute JHD1313M2_attribute_bcolor =__ATTR(rgb_b, 0660,
-					 NULL, JHD1313M2_store);
 static int JHD1313M2_RGB_probe(struct i2c_client *client, const struct i2c_device_id *idp)
 {
 	printk("%s: trying to probe the device (%s)...\n",__FUNCTION__,client->name);
@@ -212,35 +205,13 @@ static int JHD1313M2_LCD_remove(struct i2c_client *client)
 	//i2c_del_adapter(JHD1313M2_adapter);
 	return 0;
 }
-static struct i2c_driver JHD1313M2_RGB_driver = {
-
-	.driver = {
-		.name ="JHD1313M2_RGB",
-		.owner=THIS_MODULE,
-		
-	},
-	.id_table = RGB_device_idtable,
-	.probe = JHD1313M2_RGB_probe,
-	.remove = JHD1313M2_RGB_remove,
-};
-static struct i2c_driver JHD1313M2_LCD_driver = {
-
-	.driver = {
-		.name ="JHD1313M2_LCD",
-		.owner=THIS_MODULE,
-		
-	},
-	.id_table = LCD_device_idtable,
-	.probe = JHD1313M2_LCD_probe,
-	.remove = JHD1313M2_LCD_remove,
-};
 
 static int __init JHD1313M2_init(void)
 {
 
-	int res_lcd,res_rgb;
-	printk("%s: Obtaining adapter from bus 1\n",__FUNCTION__);	
-	JHD1313M2_adapter = i2c_get_adapter(1);
+	int res_lcd,res_rgb,result;
+	printk("%s: Obtaining adapter from bus %d\n",__FUNCTION__,BUS);	
+	JHD1313M2_adapter = i2c_get_adapter(BUS);
 	printk("%s: creating new device...\n",__FUNCTION__);
 	JHD1313M2_RGB_client = i2c_new_device(JHD1313M2_adapter,&board_info[0]);
 	JHD1313M2_LCD_client = i2c_new_device(JHD1313M2_adapter,&board_info[1]);
@@ -248,12 +219,11 @@ static int __init JHD1313M2_init(void)
 	res_rgb = i2c_add_driver(&JHD1313M2_RGB_driver);
 	res_lcd = i2c_add_driver(&JHD1313M2_LCD_driver);
 	printk("%s: creating sysfs access...\n",__FUNCTION__);	
-	JHD1313M2_kobject = kobject_create_and_add("JHD1313M2",
-                                                 kernel_kobj);
-	sysfs_create_file(JHD1313M2_kobject, &JHD1313M2_attribute_lcdtext.attr);
-	sysfs_create_file(JHD1313M2_kobject, &JHD1313M2_attribute_rcolor.attr);
-	sysfs_create_file(JHD1313M2_kobject, &JHD1313M2_attribute_gcolor.attr);
-	sysfs_create_file(JHD1313M2_kobject, &JHD1313M2_attribute_bcolor.attr);
+	JHD1313M2_kobject = kobject_create_and_add("JHD1313M2", kernel_kobj);
+	result = sysfs_create_file(JHD1313M2_kobject,&(JHD1313M2_attributes[0].attr));
+	result = sysfs_create_file(JHD1313M2_kobject,&(JHD1313M2_attributes[1].attr));
+	result = sysfs_create_file(JHD1313M2_kobject,&(JHD1313M2_attributes[2].attr));
+	result = sysfs_create_file(JHD1313M2_kobject,&(JHD1313M2_attributes[3].attr));
 
 	return 0;
 	

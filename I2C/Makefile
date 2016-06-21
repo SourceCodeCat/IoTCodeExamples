@@ -1,7 +1,7 @@
 obj-m += MPL3115A2.o
 obj-m += JHD1313M2.o
 
-all:i2ctest lcdtest example modules 
+all:i2ctest lcdtest modules 
 
 i2ctest:i2c.c
 		gcc -O i2c.c -o i2ctest

@@ -31,53 +31,50 @@
 
 #define TAG "JHD1313M2"
 //////////////////////////////////////////////////////////
-#define RGB_SLAVE	0x62
-#define LCD_SLAVE	0x3E
-#define BUS		0x01
-#define REG_RED         0x04        // pwm2
-#define REG_GREEN       0x03        // pwm1
-#define REG_BLUE        0x02        // pwm0
-#define REG_MODE1       0x00
-#define REG_MODE2       0x01
-#define REG_OUTPUT      0x08
+#define RGB_SLAVE		0x62
+#define LCD_SLAVE		0x3E
+#define BUS			0x06
+#define REG_RED         	0x04        // pwm2
+#define REG_GREEN       	0x03        // pwm1
+#define REG_BLUE        	0x02        // pwm0
+#define REG_MODE1       	0x00
+#define REG_MODE2       	0x01
+#define REG_OUTPUT      	0x08
 
 // commands
 #define LCD_CLEARDISPLAY	0x01
-#define LCD_RETURNHOME	0x02
+#define LCD_RETURNHOME		0x02
 #define LCD_ENTRYMODESET	0x04
 #define LCD_DISPLAYCONTROL	0x08
-#define LCD_CURSORSHIFT	0x10
-#define LCD_FUNCTIONSET 0x20
+#define LCD_CURSORSHIFT		0x10
+#define LCD_FUNCTIONSET 	0x20
 #define LCD_SETCGRAMADDR	0x40
 #define LCD_SETDDRAMADDR	0x80
 
 // flags for display entry mode
-#define LCD_ENTRYRIGHT	0x00
-#define LCD_ENTRYLEFT	0x02
+#define LCD_ENTRYRIGHT		0x00
+#define LCD_ENTRYLEFT		0x02
 #define LCD_ENTRYSHIFTINCREMENT 0x01
 #define LCD_ENTRYSHIFTDECREMENT 0x00
 
 // flags for display on/off control
-#define LCD_DISPLAYON	0x04
-#define LCD_DISPLAYOFF	0x00
-#define LCD_CURSORON	0x02
-#define LCD_CURSOROFF	0x00
-#define LCD_BLINKON	0x01
-#define LCD_BLINKOFF	0x00
+#define LCD_DISPLAYON		0x04
+#define LCD_DISPLAYOFF		0x00
+#define LCD_CURSORON		0x02
+#define LCD_CURSOROFF		0x00
+#define LCD_BLINKON		0x01
+#define LCD_BLINKOFF		0x00
 
 // flags for display/cursor shift
-#define LCD_DISPLAYMOVE 0x08
-#define LCD_CURSORMOVE	0x00
-#define LCD_MOVERIGHT	0x04
-#define LCD_MOVELEFT	0x00
+#define LCD_DISPLAYMOVE 	0x08
+#define LCD_CURSORMOVE		0x00
+#define LCD_MOVERIGHT		0x04
+#define LCD_MOVELEFT		0x00
 
 // flags for function set
-#define LCD_8BITMODE	0x10
-#define LCD_4BITMODE	0x00
-#define LCD_2LINE	0x08
-#define LCD_1LINE	0x00
-//#define LCD_5x10DOTS	0x04
-#define LCD_5x8DOTS	0x00
+#define LCD_8BITMODE		0x10
+#define LCD_2LINE		0x08
+
 //////////////////////////////////////////////////////////
 uint8_t _displayfunction = 0;
 uint8_t _displaycontrol = 0;
@@ -92,14 +89,12 @@ static struct i2c_client * JHD1313M2_RGB_client;
 static struct i2c_client * JHD1313M2_LCD_client;
 static struct i2c_adapter * JHD1313M2_adapter;
 static struct kobject * JHD1313M2_kobject;
-static char * lcd_text; //variable ot link user space-driver
-static int * rgb_r; //variable to set the red color from usr space
-static int * rgb_g; //variable to set the green color from usr space
-static int * rgb_b; //variable to set the blue color from usr space
+char * lcd_text_; //variable ot link user space-driver
+int rgb_r_; //variable to set the red color from usr space
+int rgb_g_; //variable to set the green color from usr space
+int rgb_b_; //variable to set the blue color from usr space
 
-
-
-
+/////////////////////////////////////////////////////////
 static struct i2c_device_id RGB_device_idtable[] = {
 	{ "JHD1313M2_RGB", 0 },
 	{ }
@@ -110,7 +105,6 @@ static struct i2c_device_id LCD_device_idtable[] = {
 	{ }
 };
 
-
 static struct i2c_board_info board_info[] = {
 
 	{.type = "JHD1313M2_RGB",
@@ -118,16 +112,59 @@ static struct i2c_board_info board_info[] = {
 	{.type = "JHD1313M2_LCD",
 	.addr = LCD_SLAVE},
 };
-/*
-static struct i2c_board_info board_info_RGB = {
-	.type = "JHD1313M2_RGB",
-	.addr = RGB_SLAVE,
-};
-static struct i2c_board_info board_info_LCD = {
-	.type = "JHD1313M2_LCD",
-	.addr = LCD_SLAVE,
-};
-*/
+/////////////////////////////////////////////////////////
+s32 readWordRegister(const struct i2c_client *client, u8 reg);
+s32 writeByteRegister(const struct i2c_client *client,u8 reg, u8 value);
+void clearLCD(const struct i2c_client *client);
+void writeToLCD(const struct i2c_client *client, char *c);
+void set_R_Color(const struct i2c_client *client, int r);
+void set_G_Color(const struct i2c_client *client, int g);
+void set_B_Color(const struct i2c_client *client, int b);
+void initLCD(const struct i2c_client *client);
+void turnOffRGB(const struct i2c_client *client);
+void initRGB(const struct i2c_client *client);
+static ssize_t JHD1313M2_store(struct kobject *kobj, 
+			struct kobj_attribute *attr, char *buf, size_t count);
+/////////////////////////////////////////////////////////
 
+static struct kobj_attribute JHD1313M2_attributes[] = {
+	__ATTR(lcd_text, 0660, NULL, JHD1313M2_store),
+	__ATTR(rgb_r, 0660, NULL, JHD1313M2_store),
+	__ATTR(rgb_g, 0660, NULL, JHD1313M2_store),
+	__ATTR(rgb_b, 0660, NULL, JHD1313M2_store),
+}; 
+/////////////////////////////////////////////////////////
+static int JHD1313M2_RGB_probe(struct i2c_client *client, 
+			const struct i2c_device_id *idp);
+static int JHD1313M2_LCD_probe(struct i2c_client *client, 
+			const struct i2c_device_id *idp);
+static int JHD1313M2_RGB_remove(struct i2c_client *client);
+static int JHD1313M2_LCD_remove(struct i2c_client *client);
+/////////////////////////////////////////////////////////
+static struct i2c_driver JHD1313M2_RGB_driver = {
+
+	.driver = {
+		.name ="JHD1313M2_RGB",
+		.owner=THIS_MODULE,
+		
+	},
+	.id_table = RGB_device_idtable,
+	.probe = JHD1313M2_RGB_probe,
+	.remove = JHD1313M2_RGB_remove,
+};
+static struct i2c_driver JHD1313M2_LCD_driver = {
+
+	.driver = {
+		.name ="JHD1313M2_LCD",
+		.owner=THIS_MODULE,
+		
+	},
+	.id_table = LCD_device_idtable,
+	.probe = JHD1313M2_LCD_probe,
+	.remove = JHD1313M2_LCD_remove,
+};
+/////////////////////////////////////////////////////////
+static int __init JHD1313M2_init(void);
+static void __exit JHD1313M2_exit(void);
 
 #endif
