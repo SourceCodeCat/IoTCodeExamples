@@ -113,31 +113,42 @@ static struct i2c_board_info board_info[] = {
 	.addr = LCD_SLAVE},
 };
 /////////////////////////////////////////////////////////
-s32 readWordRegister(const struct i2c_client *client, u8 reg);
-s32 writeByteRegister(const struct i2c_client *client,u8 reg, u8 value);
-void clearLCD(const struct i2c_client *client);
-void writeToLCD(const struct i2c_client *client, char *c);
-void set_R_Color(const struct i2c_client *client, int r);
-void set_G_Color(const struct i2c_client *client, int g);
-void set_B_Color(const struct i2c_client *client, int b);
-void initLCD(const struct i2c_client *client);
-void turnOffRGB(const struct i2c_client *client);
-void initRGB(const struct i2c_client *client);
+s32 readWordRegister(struct i2c_client *client, u8 reg);
+s32 writeByteRegister(struct i2c_client *client,u8 reg, u8 value);
+void clearLCD(struct i2c_client *client);
+void writeToLCD(struct i2c_client *client, const char *c);
+void set_R_Color(struct i2c_client *client, int r);
+void set_G_Color(struct i2c_client *client, int g);
+void set_B_Color(struct i2c_client *client, int b);
+void initLCD(struct i2c_client *client);
+void turnOffRGB(struct i2c_client *client);
+void initRGB(struct i2c_client *client);
+/*
 static ssize_t JHD1313M2_store(struct kobject *kobj, 
 			struct kobj_attribute *attr, char *buf, size_t count);
+*/
+static ssize_t JHD1313M2_store(struct kobject *kobj, 
+		struct kobj_attribute *attr, const char *buf, size_t count);
 /////////////////////////////////////////////////////////
-
+/*
 static struct kobj_attribute JHD1313M2_attributes[] = {
-	__ATTR(lcd_text, 0660, NULL, JHD1313M2_store),
-	__ATTR(rgb_r, 0660, NULL, JHD1313M2_store),
-	__ATTR(rgb_g, 0660, NULL, JHD1313M2_store),
-	__ATTR(rgb_b, 0660, NULL, JHD1313M2_store),
-}; 
+	__ATTR(lcd_text, 0222, NULL, JHD1313M2_store),
+	__ATTR(rgb_r, 0222, NULL, JHD1313M2_store),
+	__ATTR(rgb_g, 0222, NULL, JHD1313M2_store),
+	__ATTR(rgb_b, 0222, NULL, JHD1313M2_store),
+};
+*/
+static struct kobj_attribute JHD1313M2_attributes[] = {
+	__ATTR(lcd_text, 0222, NULL, JHD1313M2_store),
+	__ATTR(rgb_r, 0222, NULL, JHD1313M2_store),
+	__ATTR(rgb_g, 0222, NULL, JHD1313M2_store),
+	__ATTR(rgb_b, 0222, NULL, JHD1313M2_store),
+};  
 /////////////////////////////////////////////////////////
 static int JHD1313M2_RGB_probe(struct i2c_client *client, 
 			const struct i2c_device_id *idp);
 static int JHD1313M2_LCD_probe(struct i2c_client *client, 
-			const struct i2c_device_id *idp);
+			 const struct i2c_device_id *idp);
 static int JHD1313M2_RGB_remove(struct i2c_client *client);
 static int JHD1313M2_LCD_remove(struct i2c_client *client);
 /////////////////////////////////////////////////////////

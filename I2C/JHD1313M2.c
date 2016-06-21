@@ -14,7 +14,7 @@
  */
 #include "JHD1313M2.h"
 
-s32 readWordRegister(const struct i2c_client *client, u8 reg)
+s32 readWordRegister(struct i2c_client *client, u8 reg)
 {
 	
 	s32 res = -1;
@@ -27,7 +27,7 @@ s32 readWordRegister(const struct i2c_client *client, u8 reg)
 	return res;
 	
 }
-s32 writeByteRegister(const struct i2c_client *client,u8 reg, u8 value)
+s32 writeByteRegister(struct i2c_client *client,u8 reg, u8 value)
 {
 	s32 res = -1;
 	res = i2c_smbus_write_byte_data(client, reg, value);
@@ -38,12 +38,12 @@ s32 writeByteRegister(const struct i2c_client *client,u8 reg, u8 value)
 	}
 	return res;
 }
-void clearLCD(const struct i2c_client *client)
+void clearLCD(struct i2c_client *client)
 {
 	writeByteRegister(client, 0x00, LCD_CLEARDISPLAY );
 	msleep(1);
 }
-void writeToLCD(const struct i2c_client *client, char *c)
+void writeToLCD(struct i2c_client *client, const char *c)
 {
 
 	//writeByteRegister(lcd->file, 0x80, 0x48);
@@ -59,26 +59,26 @@ void writeToLCD(const struct i2c_client *client, char *c)
 		writeByteRegister(client, 0x40, ascii_val);
 	}
 }
-void set_R_Color(const struct i2c_client *client, int r)
+void set_R_Color(struct i2c_client *client, int r)
 {
 	writeByteRegister(client, REG_RED, r);
 }
-void set_G_Color(const struct i2c_client *client, int g)
+void set_G_Color(struct i2c_client *client, int g)
 {
 	writeByteRegister(client, REG_GREEN, g);
 }
-void set_B_Color(const struct i2c_client *client, int b)
+void set_B_Color(struct i2c_client *client, int b)
 {
     	writeByteRegister(client, REG_BLUE, b);
 }
-void setRGBColor(const struct i2c_client *client, int r, int g, int b)
+void setRGBColor(struct i2c_client *client, int r, int g, int b)
 {
     	writeByteRegister(client, REG_RED, r);
 	writeByteRegister(client, REG_GREEN, g);
     	writeByteRegister(client, REG_BLUE, b);    
 	//i2cRead(client, 0x04);
 }
-void initLCD(const struct i2c_client *client)
+void initLCD(struct i2c_client *client)
 {
 
 	writeByteRegister(client, 0x00, LCD_FUNCTIONSET | LCD_2LINE );
@@ -93,18 +93,18 @@ void initLCD(const struct i2c_client *client)
 
 }
 
-void turnOffRGB(const struct i2c_client *client)
+void turnOffRGB(struct i2c_client *client)
 {
 	setRGBColor(client, 0x00, 0x00, 0x00);	
 }
-void turnOffLCD(const struct i2c_client *client)
+void turnOffLCD(struct i2c_client *client)
 {
 	
 	writeByteRegister(client, 0x00, LCD_DISPLAYCONTROL );
 	writeByteRegister(client, 0x00, LCD_CLEARDISPLAY );
 
 }
-void initRGB(const struct i2c_client *client)
+void initRGB(struct i2c_client *client)
 {
     	// backlight init
     	writeByteRegister(client, REG_MODE1, 0);
@@ -123,7 +123,7 @@ static ssize_t JHD1313M2_show(struct kobject *kobj, struct kobj_attribute *attr,
 }
 */
 static ssize_t JHD1313M2_store(struct kobject *kobj, struct kobj_attribute *attr,
-                      char *buf, size_t count)
+                      const char *buf, size_t count)
 {
 	//printk("%s: Message from user space:  %s\n",__FUNCTION__,buf);
 	//printk("%s: attr:  %s\n",__FUNCTION__,attr->attr.name);
@@ -131,7 +131,7 @@ static ssize_t JHD1313M2_store(struct kobject *kobj, struct kobj_attribute *attr
 	if(strcmp(attr->attr.name,"lcd_text") == 0)
 	{
 		//sscanf(buf, "%c", lcd_text);
-		//snprintf(lcd_text, sizeof(buf)-1,"%s",buf);
+		//snprintf(lcd_text_, sizeof(buf)-1,"%s",buf);
 		//buf[sizeof(buf)] = ' ';
 		clearLCD(JHD1313M2_LCD_client);	
 		writeToLCD(JHD1313M2_LCD_client,buf);
@@ -145,6 +145,7 @@ static ssize_t JHD1313M2_store(struct kobject *kobj, struct kobj_attribute *attr
 	else if(strcmp(attr->attr.name,"rgb_g") == 0)
 	{
 		sscanf(buf, "%du", &rgb_g_);
+
 		set_G_Color(JHD1313M2_RGB_client,rgb_g_);
 	}
 	else if(strcmp(attr->attr.name,"rgb_b") == 0)
@@ -155,7 +156,8 @@ static ssize_t JHD1313M2_store(struct kobject *kobj, struct kobj_attribute *attr
         return count;
 }
 
-static int JHD1313M2_RGB_probe(struct i2c_client *client, const struct i2c_device_id *idp)
+static int JHD1313M2_RGB_probe(struct i2c_client *client, 
+						const struct i2c_device_id *idp)
 {
 	printk("%s: trying to probe the device (%s)...\n",__FUNCTION__,client->name);
 	JHD1313M2_RGB_client = client;	
@@ -171,7 +173,8 @@ static int JHD1313M2_RGB_probe(struct i2c_client *client, const struct i2c_devic
 */
 	return 0;
 }
-static int JHD1313M2_LCD_probe(struct i2c_client *client, const struct i2c_device_id *idp)
+static int JHD1313M2_LCD_probe(struct i2c_client *client, 
+						const struct i2c_device_id *idp)
 {
 	printk("%s: trying to probe the device (%s)...\n",__FUNCTION__,client->name);
 	JHD1313M2_LCD_client = client;	
