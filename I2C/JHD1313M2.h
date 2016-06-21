@@ -10,7 +10,7 @@
  *	the Free Software Foundation, version 2 of the License.
  *
  * This driver shows how toimplement a minimal driver for the I2C JHD1313M2
- * barometric chip.
+ * RGB-LCD.
  */
 
 #ifndef JHD1313M2_H
@@ -34,12 +34,12 @@
 #define RGB_SLAVE		0x62
 #define LCD_SLAVE		0x3E
 #define BUS			0x06
-#define REG_RED         	0x04        // pwm2
-#define REG_GREEN       	0x03        // pwm1
-#define REG_BLUE        	0x02        // pwm0
-#define REG_MODE1       	0x00
-#define REG_MODE2       	0x01
-#define REG_OUTPUT      	0x08
+#define REG_RED			0x04        // pwm2
+#define REG_GREEN		0x03        // pwm1
+#define REG_BLUE		0x02        // pwm0
+#define REG_MODE1		0x00
+#define REG_MODE2		0x01
+#define REG_OUTPUT		0x08
 
 // commands
 #define LCD_CLEARDISPLAY	0x01
@@ -89,10 +89,10 @@ static struct i2c_client * JHD1313M2_RGB_client;
 static struct i2c_client * JHD1313M2_LCD_client;
 static struct i2c_adapter * JHD1313M2_adapter;
 static struct kobject * JHD1313M2_kobject;
-char * lcd_text_; //variable ot link user space-driver
-int rgb_r_; //variable to set the red color from usr space
-int rgb_g_; //variable to set the green color from usr space
-int rgb_b_; //variable to set the blue color from usr space
+char * lcd_text_; //variable to store user space lcd_text data
+int rgb_r_; //variable to store the red color from usr space
+int rgb_g_; //variable to store the green color from usr space
+int rgb_b_; //variable to store the blue color from usr space
 
 /////////////////////////////////////////////////////////
 static struct i2c_device_id RGB_device_idtable[] = {
@@ -123,21 +123,10 @@ void set_B_Color(struct i2c_client *client, int b);
 void initLCD(struct i2c_client *client);
 void turnOffRGB(struct i2c_client *client);
 void initRGB(struct i2c_client *client);
-/*
-static ssize_t JHD1313M2_store(struct kobject *kobj, 
-			struct kobj_attribute *attr, char *buf, size_t count);
-*/
 static ssize_t JHD1313M2_store(struct kobject *kobj, 
 		struct kobj_attribute *attr, const char *buf, size_t count);
 /////////////////////////////////////////////////////////
-/*
-static struct kobj_attribute JHD1313M2_attributes[] = {
-	__ATTR(lcd_text, 0222, NULL, JHD1313M2_store),
-	__ATTR(rgb_r, 0222, NULL, JHD1313M2_store),
-	__ATTR(rgb_g, 0222, NULL, JHD1313M2_store),
-	__ATTR(rgb_b, 0222, NULL, JHD1313M2_store),
-};
-*/
+
 static struct kobj_attribute JHD1313M2_attributes[] = {
 	__ATTR(lcd_text, 0222, NULL, JHD1313M2_store),
 	__ATTR(rgb_r, 0222, NULL, JHD1313M2_store),

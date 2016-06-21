@@ -10,7 +10,7 @@
  *	the Free Software Foundation, version 2 of the License.
  *
  * This driver shows how to implement a minimal driver for the I2C JHD1313M2
- * barometric chip.
+ * RGB-LCD.
  */
 #include "JHD1313M2.h"
 
@@ -46,9 +46,6 @@ void clearLCD(struct i2c_client *client)
 void writeToLCD(struct i2c_client *client, const char *c)
 {
 
-	//writeByteRegister(lcd->file, 0x80, 0x48);
-	//usleep(4000);
-	
 	int ascii_val=0;
 	int i;
 	int s = strlen(c)-1; //this is to avoid writing the last character,
@@ -76,7 +73,6 @@ void setRGBColor(struct i2c_client *client, int r, int g, int b)
     	writeByteRegister(client, REG_RED, r);
 	writeByteRegister(client, REG_GREEN, g);
     	writeByteRegister(client, REG_BLUE, b);    
-	//i2cRead(client, 0x04);
 }
 void initLCD(struct i2c_client *client)
 {
@@ -115,13 +111,7 @@ void initRGB(struct i2c_client *client)
 	// set the baklight Color to white :)
 	setRGBColor(client, 0xFF, 0xFF, 0xFF);//	
 }
-/*
-static ssize_t JHD1313M2_show(struct kobject *kobj, struct kobj_attribute *attr,
-                      char *buf)
-{
-        return sprintf(buf, "%d\n", 1);
-}
-*/
+
 static ssize_t JHD1313M2_store(struct kobject *kobj, struct kobj_attribute *attr,
                       const char *buf, size_t count)
 {
@@ -139,13 +129,11 @@ static ssize_t JHD1313M2_store(struct kobject *kobj, struct kobj_attribute *attr
 	else if(strcmp(attr->attr.name,"rgb_r") == 0)
 	{
 		sscanf(buf, "%du", &rgb_r_);
-		//printk("%s: red new val:  %d\n",__FUNCTION__,rgb_r);
 		set_R_Color(JHD1313M2_RGB_client,rgb_r_);
 	}
 	else if(strcmp(attr->attr.name,"rgb_g") == 0)
 	{
 		sscanf(buf, "%du", &rgb_g_);
-
 		set_G_Color(JHD1313M2_RGB_client,rgb_g_);
 	}
 	else if(strcmp(attr->attr.name,"rgb_b") == 0)
@@ -161,16 +149,7 @@ static int JHD1313M2_RGB_probe(struct i2c_client *client,
 {
 	printk("%s: trying to probe the device (%s)...\n",__FUNCTION__,client->name);
 	JHD1313M2_RGB_client = client;	
-	initRGB(JHD1313M2_RGB_client);
-	
-/*
-	s32 id;
-	printk("%s: trying to probe the device (%s)...\n",
-		__FUNCTION__,client->name);
-	id = readWordRegister(client, JHD1313M2_WHO_AM_I);
-	printk("%s: device id: %d \n",TAG,id);
-	printk("%s: device %s \n",__FUNCTION__, (id == JHD1313M2_ID)?"SUCCESSFULLY identified":"FAILED to be identified");
-*/
+	initRGB(JHD1313M2_RGB_client);	
 	return 0;
 }
 static int JHD1313M2_LCD_probe(struct i2c_client *client, 
@@ -180,14 +159,6 @@ static int JHD1313M2_LCD_probe(struct i2c_client *client,
 	JHD1313M2_LCD_client = client;	
 	initLCD(JHD1313M2_LCD_client);
 	writeToLCD(JHD1313M2_LCD_client,"nice!");
-/*
-	s32 id;
-	printk("%s: trying to probe the device (%s)...\n",
-		__FUNCTION__,client->name);
-	id = readWordRegister(client, JHD1313M2_WHO_AM_I);
-	printk("%s: device id: %d \n",TAG,id);
-	printk("%s: device %s \n",__FUNCTION__, (id == JHD1313M2_ID)?"SUCCESSFULLY identified":"FAILED to be identified");
-*/
 	return 0;
 }
 static int JHD1313M2_RGB_remove(struct i2c_client *client)
@@ -195,8 +166,6 @@ static int JHD1313M2_RGB_remove(struct i2c_client *client)
 	printk("%s: trying to remove the device...\n",__FUNCTION__);
 	printk("%s: turning OFF rgb device...\n",__FUNCTION__);
 	turnOffRGB(client);
-	//i2c_unregister_device(JHD1313M2_RGB_client);
-	//i2c_del_adapter(JHD1313M2_adapter);
 	return 0;
 }
 static int JHD1313M2_LCD_remove(struct i2c_client *client)
@@ -204,8 +173,6 @@ static int JHD1313M2_LCD_remove(struct i2c_client *client)
 	printk("%s: trying to remove the device...\n",__FUNCTION__);
 	printk("%s: turning OFF lcd device...\n",__FUNCTION__);
 	turnOffLCD(client);
-	//i2c_unregister_device(JHD1313M2_LCD_client);
-	//i2c_del_adapter(JHD1313M2_adapter);
 	return 0;
 }
 
