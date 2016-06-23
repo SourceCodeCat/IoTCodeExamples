@@ -166,6 +166,7 @@ static int JHD1313M2_RGB_remove(struct i2c_client *client)
 	printk("%s: trying to remove the device...\n",__FUNCTION__);
 	printk("%s: turning OFF rgb device...\n",__FUNCTION__);
 	turnOffRGB(client);
+	//i2c_unregister_device(client);
 	return 0;
 }
 static int JHD1313M2_LCD_remove(struct i2c_client *client)
